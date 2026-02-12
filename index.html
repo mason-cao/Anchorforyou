@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anchor for You — Stability When It Matters Most</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <!-- Top bar -->
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="#home" aria-label="Anchor for You">
+          <span class="brand-mark" aria-hidden="true">⚓</span>
+          <span class="brand-name"
+            >Anchor<span class="brand-sub">forYou</span></span
+          >
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <a href="#home">Home</a>
+          <a href="#supplements">Supplement Information</a>
+          <a href="#get-started" class="nav-cta">Get Started</a>
+          <a href="#results">Results</a>
+          <a href="#plans">Subscription</a>
+        </nav>
+
+        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <main id="app">
+      <section id="home" class="view view-active" aria-label="Home">
+        <div class="hero">
+          <div class="container hero-grid">
+            <div class="hero-copy">
+              <p class="eyebrow">STABILITY WHEN IT MATTERS MOST</p>
+              <h1 class="hero-title">
+                Cycle-aware support for female athletes.
+              </h1>
+              <p class="hero-subtitle">
+                Anchor for You builds a clinician-reviewed supplement stack
+                around your cycle, training load, and symptoms—delivered
+                monthly.
+              </p>
+
+              <div class="hero-actions">
+                <a class="btn btn-primary" href="#get-started"
+                  >Build my stack</a
+                >
+                <a class="btn btn-ghost" href="#supplements"
+                  >See what’s inside</a
+                >
+              </div>
+
+              <div class="disclaimer">
+                <strong>Prototype disclaimer:</strong> This tool provides
+                educational recommendations only and does not diagnose or
+                prescribe. Always consult a qualified clinician.
+              </div>
+            </div>
+
+            <div class="hero-card">
+              <div class="card-glow" aria-hidden="true"></div>
+              <div class="hero-card-inner">
+                <h3>What is Anchor?</h3>
+                <p>
+                  Anchor empowers female athletes to reclaim control over
+                  performance and recovery by aligning nutrition support with
+                  menstrual cycle phases and real-time symptoms.
+                </p>
+
+                <div class="mini-stats">
+                  <div class="mini-stat">
+                    <span class="mini-stat-num">Cycle-aware</span>
+                    <span class="mini-stat-label"
+                      >Personalized recommendations</span
+                    >
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-stat-num">Monthly</span>
+                    <span class="mini-stat-label">Subscription delivery</span>
+                  </div>
+                  <div class="mini-stat">
+                    <span class="mini-stat-num">Clinician-review</span>
+                    <span class="mini-stat-label">Safety-first approach</span>
+                  </div>
+                </div>
+
+                <a class="link-arrow" href="#get-started"
+                  >Get started <span aria-hidden="true">→</span></a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-wave" aria-hidden="true"></div>
+        </div>
+
+        <section class="container section">
+          <h2 class="section-title">
+            Menstruation & supplement intake importance
+          </h2>
+          <p class="section-body">
+            Training demands + cycle-related shifts can increase micronutrient
+            needs and influence recovery. A strategic, cycle-aligned approach
+            helps support consistency, energy, and performance— while staying
+            conservative and safety-focused.
+          </p>
+        </section>
+      </section>
+
+      <!-- Supplement Information -->
+      <section
+        id="supplements"
+        class="view"
+        aria-label="Supplement information"
+      >
+        <div class="container section">
+          <div class="section-head">
+            <h2 class="section-title">Supplement Information</h2>
+            <p class="section-body">
+              A transparent overview of common components used in
+              athlete-friendly stacks. Final inclusion should be
+              clinician-reviewed based on history, labs, and contraindications.
+            </p>
+          </div>
+
+          <div class="grid cards">
+            <article class="card">
+              <h3>Iron (clinician guided)</h3>
+              <p>
+                Often relevant when fatigue or heavy bleeding is present. Should
+                be tailored to labs and tolerance.
+              </p>
+              <ul class="tags">
+                <li>Energy support</li>
+                <li>Blood health</li>
+                <li>Lab-guided</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Magnesium</h3>
+              <p>
+                Commonly used for muscle function and recovery support;
+                sometimes used in cramp-focused stacks.
+              </p>
+              <ul class="tags">
+                <li>Recovery</li>
+                <li>Muscle</li>
+                <li>Sleep support*</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Omega-3</h3>
+              <p>
+                Often included for general recovery support and overall
+                wellness.
+              </p>
+              <ul class="tags">
+                <li>Recovery</li>
+                <li>Wellness</li>
+                <li>Foundation</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Vitamin D</h3>
+              <p>
+                Frequently included when levels are low; best guided by testing
+                and clinician review.
+              </p>
+              <ul class="tags">
+                <li>Immune support</li>
+                <li>Bone health</li>
+                <li>Lab-guided</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Zinc</h3>
+              <p>
+                Often used as a conservative “foundation” component—avoid excess
+                dosing long-term.
+              </p>
+              <ul class="tags">
+                <li>Immune</li>
+                <li>Foundation</li>
+                <li>Conservative</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <h3>Electrolytes</h3>
+              <p>
+                Commonly used to support training demands—especially in heat or
+                high volume weeks.
+              </p>
+              <ul class="tags">
+                <li>Hydration</li>
+                <li>Training load</li>
+                <li>Recovery</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="note">
+            <p>
+              <strong>*Note:</strong> Individual responses vary. Always check
+              interactions, allergies, and contraindications.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Get Started -->
+      <section id="get-started" class="view" aria-label="Get started form">
+        <div class="container section">
+          <div class="section-head">
+            <h2 class="section-title">Let’s Get Started</h2>
+            <p class="section-body">
+              Select what best describes you. We’ll generate a conservative,
+              clinician-reviewed stack draft.
+            </p>
+          </div>
+
+          <form id="intakeForm" class="form">
+            <div class="form-grid">
+              <!-- Cycle Regularity -->
+              <fieldset class="fieldset">
+                <legend>Cycle Regularity</legend>
+                <label class="check"
+                  ><input
+                    type="radio"
+                    name="cycleRegularity"
+                    value="regular"
+                    required
+                  />
+                  Regular</label
+                >
+                <label class="check"
+                  ><input
+                    type="radio"
+                    name="cycleRegularity"
+                    value="irregular"
+                  />
+                  Irregular</label
+                >
+                <label class="check"
+                  ><input
+                    type="radio"
+                    name="cycleRegularity"
+                    value="birth-control"
+                  />
+                  On hormonal birth control</label
+                >
+                <label class="check"
+                  ><input type="radio" name="cycleRegularity" value="unsure" />
+                  Unsure / Tracking</label
+                >
+              </fieldset>
+
+              <!-- Primary Sport -->
+              <fieldset class="fieldset">
+                <legend>Primary Sport</legend>
+                <select name="sport" required>
+                  <option value="" selected disabled>Select one</option>
+                  <option>Cross Country</option>
+                  <option>Track (distance/mid-distance)</option>
+                  <option>Long-distance Running</option>
+                  <option>Swimming</option>
+                  <option>Rowing</option>
+                  <option>Cycling</option>
+                  <option>Triathlon</option>
+                  <option>Weightlifting</option>
+                  <option>Powerlifting</option>
+                  <option>Soccer</option>
+                  <option>Basketball</option>
+                  <option>Volleyball</option>
+                  <option>Lacrosse</option>
+                  <option>Softball</option>
+                  <option>Gymnastics</option>
+                  <option>Dance</option>
+                  <option>Other</option>
+                </select>
+
+                <label class="input-inline">
+                  <span>If “Other”, specify</span>
+                  <input type="text" name="sportOther" placeholder="Optional" />
+                </label>
+              </fieldset>
+
+              <!-- Training Load -->
+              <fieldset class="fieldset">
+                <legend>Training Load</legend>
+                <label class="check"
+                  ><input
+                    type="radio"
+                    name="trainingLoad"
+                    value="low"
+                    required
+                  />
+                  Light (off-season / recovery)</label
+                >
+                <label class="check"
+                  ><input type="radio" name="trainingLoad" value="moderate" />
+                  Moderate (in-season)</label
+                >
+                <label class="check"
+                  ><input type="radio" name="trainingLoad" value="high" /> High
+                  (peak / tournament phase)</label
+                >
+              </fieldset>
+
+              <!-- Menstrual phase -->
+              <fieldset class="fieldset">
+                <legend>Menstrual Phase</legend>
+                <label class="check"
+                  ><input
+                    type="radio"
+                    name="phase"
+                    value="follicular"
+                    required
+                  />
+                  Follicular</label
+                >
+                <label class="check"
+                  ><input type="radio" name="phase" value="ovulatory" />
+                  Ovulatory</label
+                >
+                <label class="check"
+                  ><input type="radio" name="phase" value="luteal" />
+                  Luteal</label
+                >
+                <label class="check"
+                  ><input type="radio" name="phase" value="unsure-phase" /> Not
+                  sure</label
+                >
+
+                <label class="input-inline">
+                  <span>Estimated last period date (optional)</span>
+                  <input type="date" name="lmp" />
+                </label>
+              </fieldset>
+
+              <!-- Symptoms -->
+              <fieldset class="fieldset fieldset-wide">
+                <legend>Symptoms (select as many as needed)</legend>
+                <div class="symptoms-grid">
+                  <label class="check"
+                    ><input type="checkbox" name="symptoms" value="fatigue" />
+                    Fatigue</label
+                  >
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      name="symptoms"
+                      value="heavy-bleeding"
+                    />
+                    Heavy bleeding</label
+                  >
+                  <label class="check"
+                    ><input type="checkbox" name="symptoms" value="cramps" />
+                    Cramps</label
+                  >
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      name="symptoms"
+                      value="poor-sleep"
+                    />
+                    Poor sleep</label
+                  >
+                  <label class="check"
+                    ><input type="checkbox" name="symptoms" value="brain-fog" />
+                    Brain fog</label
+                  >
+                  <label class="check"
+                    ><input type="checkbox" name="symptoms" value="headaches" />
+                    Headaches</label
+                  >
+                  <label class="check"
+                    ><input type="checkbox" name="symptoms" value="bloating" />
+                    Bloating</label
+                  >
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      name="symptoms"
+                      value="mood-swings"
+                    />
+                    Mood swings</label
+                  >
+                </div>
+
+                <label class="input-inline">
+                  <span>Anything else you want us to know? (optional)</span>
+                  <textarea
+                    name="notes"
+                    rows="3"
+                    placeholder="Allergies, sensitivities, preferences, etc."
+                  ></textarea>
+                </label>
+              </fieldset>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                Generate my stack
+              </button>
+              <button type="button" class="btn btn-ghost" id="clearFormBtn">
+                Clear
+              </button>
+            </div>
+
+            <p class="fineprint">
+              By continuing, you agree this is an educational prototype and not
+              a substitute for medical care.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <section id="results" class="view" aria-label="Results">
+        <div class="container section">
+          <div class="section-head results-head">
+            <div>
+              <h2 class="section-title">Results</h2>
+              <p class="section-body" id="resultsSummary">
+                Complete the intake to see your stack.
+              </p>
+            </div>
+            <div class="results-actions">
+              <a class="btn btn-ghost" href="#get-started">Edit responses</a>
+              <a class="btn btn-primary" href="#plans">Choose a plan</a>
+            </div>
+          </div>
+
+          <div
+            class="grid results-grid"
+            id="resultsGrid"
+            aria-live="polite"
+          ></div>
+
+          <div class="note" id="safetyNote" hidden>
+            <p>
+              <strong>Safety note:</strong> Recommendations are conservative and
+              must be reviewed for interactions, conditions, and lab values
+              (especially iron/vitamin D).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subscription -->
+      <section id="plans" class="view" aria-label="Subscription plans">
+        <div class="container section">
+          <div class="section-head">
+            <h2 class="section-title">Subscription Tier / Plan</h2>
+            <p class="section-body">
+              Pricing + fulfillment are placeholders in this prototype. In a
+              real build, you’d connect Stripe, accounts, shipping, and
+              clinician review.
+            </p>
+          </div>
+
+          <div class="grid plans">
+            <article class="card plan">
+              <h3>Foundation</h3>
+              <p class="plan-price">$29<span>/mo</span></p>
+              <ul class="plan-list">
+                <li>Base stack</li>
+                <li>Monthly delivery</li>
+                <li>Quarterly re-check</li>
+              </ul>
+              <button class="btn btn-ghost" data-plan="Foundation">
+                Select
+              </button>
+            </article>
+
+            <article class="card plan plan-featured">
+              <div class="badge">Most Popular</div>
+              <h3>Performance</h3>
+              <p class="plan-price">$49<span>/mo</span></p>
+              <ul class="plan-list">
+                <li>Personalized stack</li>
+                <li>Cycle-phase adjustments</li>
+                <li>Priority chat support*</li>
+              </ul>
+              <button class="btn btn-primary" data-plan="Performance">
+                Select
+              </button>
+            </article>
+
+            <article class="card plan">
+              <h3>Elite</h3>
+              <p class="plan-price">$79<span>/mo</span></p>
+              <ul class="plan-list">
+                <li>Personalized stack + add-ons</li>
+                <li>Monthly check-ins*</li>
+                <li>Training load tuning*</li>
+              </ul>
+              <button class="btn btn-ghost" data-plan="Elite">Select</button>
+            </article>
+          </div>
+
+          <div class="note">
+            <p>
+              <strong>*Prototype:</strong> Support features shown for UX only.
+              Real features require staffing + compliance.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer-inner">
+          <p>© <span id="year"></span> Anchor for You. All rights reserved.</p>
+          <p class="footer-links">
+            <a href="#home">Home</a>
+            <a href="#supplements">Supplement Information</a>
+            <a href="#get-started">Get Started</a>
+            <a href="#plans">Subscription</a>
+          </p>
+        </div>
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
