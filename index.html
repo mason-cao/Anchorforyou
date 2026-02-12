@@ -17,7 +17,7 @@
   </head>
 
   <body>
-    <!-- Top bar -->
+    <!-- Header -->
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="#home" aria-label="Anchor for You">
@@ -27,9 +27,9 @@
           >
         </a>
 
-        <nav class="nav" aria-label="Primary">
+        <nav class="nav" aria-label="Primary" id="primaryNav">
           <a href="#home">Home</a>
-          <a href="#supplements">Supplement Information</a>
+          <a href="#supplements">Supplement Info</a>
           <a href="#get-started" class="nav-cta">Get Started</a>
           <a href="#results">Results</a>
           <a href="#plans">Subscription</a>
@@ -40,13 +40,14 @@
         </button>
       </div>
     </header>
+
     <!-- Top loading progress (hidden by default) -->
     <div class="top-progress" id="topProgress" aria-hidden="true">
       <div class="top-progress-bar" id="topProgressBar"></div>
     </div>
 
-    <!-- Hero -->
     <main id="app">
+      <!-- Home -->
       <section id="home" class="view view-active" aria-label="Home">
         <div class="hero">
           <div class="container hero-grid">
@@ -57,7 +58,7 @@
               </h1>
               <p class="hero-subtitle">
                 Anchor for You builds a clinician-reviewed supplement stack
-                around your cycle, training load, and symptoms—delivered
+                draft around your cycle, training load, and symptoms—delivered
                 monthly.
               </p>
 
@@ -71,20 +72,20 @@
               </div>
 
               <div class="disclaimer">
-                <strong>Prototype disclaimer:</strong> This tool provides
-                educational recommendations only and does not diagnose or
-                prescribe. Always consult a qualified clinician.
+                <strong>Prototype disclaimer:</strong> Educational only. No
+                diagnoses or prescriptions are provided. Always consult a
+                qualified clinician.
               </div>
             </div>
 
-            <div class="hero-card">
+            <div class="hero-card card">
               <div class="card-glow" aria-hidden="true"></div>
               <div class="hero-card-inner">
                 <h3>What is Anchor?</h3>
                 <p>
                   Anchor empowers female athletes to reclaim control over
                   performance and recovery by aligning nutrition support with
-                  menstrual cycle phases and real-time symptoms.
+                  cycle phases and real-time symptoms.
                 </p>
 
                 <div class="mini-stats">
@@ -99,8 +100,10 @@
                     <span class="mini-stat-label">Subscription delivery</span>
                   </div>
                   <div class="mini-stat">
-                    <span class="mini-stat-num">Clinician-review</span>
-                    <span class="mini-stat-label">Safety-first approach</span>
+                    <span class="mini-stat-num">Safety-first</span>
+                    <span class="mini-stat-label"
+                      >Clinician review emphasized</span
+                    >
                   </div>
                 </div>
 
@@ -115,14 +118,12 @@
         </div>
 
         <section class="container section">
-          <h2 class="section-title">
-            Menstruation & supplement intake importance
-          </h2>
+          <h2 class="section-title">Why cycle-aware support matters</h2>
           <p class="section-body">
-            Training demands + cycle-related shifts can increase micronutrient
-            needs and influence recovery. A strategic, cycle-aligned approach
-            helps support consistency, energy, and performance— while staying
-            conservative and safety-focused.
+            Training demand + cycle-related shifts can influence recovery and
+            perceived energy. A strategic, conservative approach helps support
+            consistency while keeping safety and clinician review
+            front-and-center.
           </p>
         </section>
       </section>
@@ -147,8 +148,8 @@
             <article class="card">
               <h3>Iron (clinician guided)</h3>
               <p>
-                Often relevant when fatigue or heavy bleeding is present. Should
-                be tailored to labs and tolerance.
+                Often considered when fatigue or heavy bleeding is present. Best
+                tailored to labs and tolerance.
               </p>
               <ul class="tags">
                 <li>Energy support</li>
@@ -161,7 +162,7 @@
               <h3>Magnesium</h3>
               <p>
                 Commonly used for muscle function and recovery support;
-                sometimes used in cramp-focused stacks.
+                sometimes included for cramps.
               </p>
               <ul class="tags">
                 <li>Recovery</li>
@@ -173,8 +174,8 @@
             <article class="card">
               <h3>Omega-3</h3>
               <p>
-                Often included for general recovery support and overall
-                wellness.
+                Often included as a general recovery foundation and wellness
+                support.
               </p>
               <ul class="tags">
                 <li>Recovery</li>
@@ -186,11 +187,11 @@
             <article class="card">
               <h3>Vitamin D</h3>
               <p>
-                Frequently included when levels are low; best guided by testing
-                and clinician review.
+                Often guided by testing; clinician review recommended for
+                dosing.
               </p>
               <ul class="tags">
-                <li>Immune support</li>
+                <li>Immune</li>
                 <li>Bone health</li>
                 <li>Lab-guided</li>
               </ul>
@@ -199,8 +200,8 @@
             <article class="card">
               <h3>Zinc</h3>
               <p>
-                Often used as a conservative “foundation” component—avoid excess
-                dosing long-term.
+                Commonly included as a conservative foundation component—avoid
+                excess long-term.
               </p>
               <ul class="tags">
                 <li>Immune</li>
@@ -212,8 +213,7 @@
             <article class="card">
               <h3>Electrolytes</h3>
               <p>
-                Commonly used to support training demands—especially in heat or
-                high volume weeks.
+                Often used to support higher load weeks and hydration needs.
               </p>
               <ul class="tags">
                 <li>Hydration</li>
@@ -238,8 +238,8 @@
           <div class="section-head">
             <h2 class="section-title">Let’s Get Started</h2>
             <p class="section-body">
-              Select what best describes you. We’ll generate a conservative,
-              clinician-reviewed stack draft.
+              Select what best describes you. We’ll generate a conservative
+              stack draft designed for clinician review.
             </p>
           </div>
 
@@ -488,13 +488,7 @@
             aria-live="polite"
           ></div>
 
-          <div class="note" id="safetyNote" hidden>
-            <p>
-              <strong>Safety note:</strong> Recommendations are conservative and
-              must be reviewed for interactions, conditions, and lab values
-              (especially iron/vitamin D).
-            </p>
-          </div>
+          <div class="note" id="safetyNote" hidden></div>
         </div>
       </section>
 
@@ -505,8 +499,8 @@
             <h2 class="section-title">Subscription Tier / Plan</h2>
             <p class="section-body">
               Pricing + fulfillment are placeholders in this prototype. In a
-              real build, you’d connect Stripe, accounts, shipping, and
-              clinician review.
+              real build, you’d connect payments, accounts, fulfillment, and
+              clinician review workflows.
             </p>
           </div>
 
@@ -564,7 +558,7 @@
           <p>© <span id="year"></span> Anchor for You. All rights reserved.</p>
           <p class="footer-links">
             <a href="#home">Home</a>
-            <a href="#supplements">Supplement Information</a>
+            <a href="#supplements">Supplement Info</a>
             <a href="#get-started">Get Started</a>
             <a href="#plans">Subscription</a>
           </p>

@@ -1,6 +1,7 @@
 /* Anchor for You — prototype logic
-   - simple hash-based router
+   - no-scroll SPA router (hash + history)
    - intake form -> rules engine -> renders results cards
+   - top progress bar + results skeleton
    - stores last results in localStorage
 */
 
@@ -9,6 +10,7 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 const STORAGE_KEY = "anchorforyou_intake_v1";
 
+/* --------- Data --------- */
 const SUPP = {
   iron: {
     name: "Iron (clinician guided)",
@@ -53,8 +55,11 @@ const SUPP = {
 
 function setYear() {
   const y = new Date().getFullYear();
-  $("#year").textContent = y;
+  const el = $("#year");
+  if (el) el.textContent = y;
 }
+
+/* --------- Loading UI --------- */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function showTopProgress() {
@@ -79,7 +84,7 @@ function finishTopProgress() {
   setTimeout(() => {
     wrap.classList.remove("show");
     bar.style.width = "0%";
-  }, 250);
+  }, 260);
 }
 
 function showResultsSkeleton() {
@@ -94,14 +99,18 @@ function hideResultsSkeleton() {
   if (sk) sk.hidden = true;
 }
 
-/* If you're using the no-scroll router version, navigateTo exists.
-   This fallback keeps it working either way. */
-function goTo(hash) {
-  if (typeof navigateTo === "function") navigateTo(hash);
-  else location.hash = hash;
+/* --------- Router (no scroll) --------- */
+function setActiveNav(hash) {
+  const current = (hash || "#home").split("?")[0] || "#home";
+  $$(".nav a").forEach((a) => {
+    const href = a.getAttribute("href");
+    const isActive = href === current;
+    a.classList.toggle("active", isActive);
+    if (isActive) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
 }
 
-/* ---------------- Router ---------------- */
 function showView(hash) {
   setActiveNav(hash);
 
@@ -109,36 +118,23 @@ function showView(hash) {
   const target = document.getElementById(id) || document.getElementById("home");
   if (!target) return;
 
-  // hide all
   $$(".view").forEach((v) => v.classList.remove("view-active", "view-anim"));
 
-  // show target + restart animation
   target.classList.add("view-active");
-  void target.offsetWidth; // force reflow so animation restarts
+  void target.offsetWidth; // restart animation
   target.classList.add("view-anim");
 
-  // Results behavior: show saved results OR show skeleton
   if (target.id === "results") {
     const saved = loadSaved();
-
     if (saved?.results) {
-      hideResultsSkeleton(); // ✅ important
+      hideResultsSkeleton();
       renderResults(saved.results, saved.intake);
     } else {
-      showResultsSkeleton(); // ✅ optional: looks polished
+      showResultsSkeleton();
     }
   } else {
-    // Not on results → keep skeleton hidden
     hideResultsSkeleton();
   }
-}
-
-function initRouter() {
-  window.addEventListener("popstate", () => {
-    showView(location.hash || "#home");
-  });
-
-  showView(location.hash || "#home");
 }
 
 function navigateTo(hash, { replace = false } = {}) {
@@ -151,6 +147,15 @@ function navigateTo(hash, { replace = false } = {}) {
   showView(hash);
 }
 
+function initRouter() {
+  window.addEventListener("popstate", () => {
+    showView(location.hash || "#home");
+  });
+
+  // initial load
+  showView(location.hash || "#home");
+}
+
 function initInternalLinks() {
   document.addEventListener("click", (e) => {
     const a = e.target.closest('a[href^="#"]');
@@ -159,12 +164,12 @@ function initInternalLinks() {
     const hash = a.getAttribute("href");
     if (!hash || hash === "#") return;
 
-    e.preventDefault(); // stops scroll-to-anchor
+    e.preventDefault(); // stop anchor scroll
     navigateTo(hash);
   });
 }
 
-/* ---------------- Mobile nav ---------------- */
+/* --------- Mobile nav --------- */
 function initNavToggle() {
   const btn = $(".nav-toggle");
   const nav = $(".nav");
@@ -173,30 +178,29 @@ function initNavToggle() {
   btn.addEventListener("click", () => {
     const expanded = btn.getAttribute("aria-expanded") === "true";
     btn.setAttribute("aria-expanded", String(!expanded));
-    nav.style.display = expanded ? "none" : "flex";
-    nav.style.flexDirection = "column";
-    nav.style.position = "absolute";
-    nav.style.right = "18px";
-    nav.style.top = "66px";
-    nav.style.padding = "10px";
-    nav.style.background = "rgba(255,255,255,.92)";
-    nav.style.border = "1px solid var(--line)";
-    nav.style.borderRadius = "18px";
-    nav.style.boxShadow = "var(--shadow)";
+    nav.classList.toggle("open", !expanded);
   });
 
-  // Close menu after clicking a link
+  // close after clicking a link (mobile)
   $$(".nav a").forEach((a) =>
     a.addEventListener("click", () => {
       if (window.innerWidth <= 720) {
-        $(".nav").style.display = "none";
+        nav.classList.remove("open");
         btn.setAttribute("aria-expanded", "false");
       }
     }),
   );
+
+  // close if resized to desktop
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 720) {
+      nav.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
 }
 
-/* ---------------- Intake + rules engine ---------------- */
+/* --------- Intake + rules engine --------- */
 function getFormData(form) {
   const fd = new FormData(form);
   const symptoms = fd.getAll("symptoms");
@@ -215,156 +219,13 @@ function getFormData(form) {
   };
 }
 
-function buildStack(intake) {
-  // Base foundation (conservative prototype)
-  const base = [SUPP.magnesium, SUPP.omega3, SUPP.vitd, SUPP.zinc];
-
-  // Pack 1: "Cycle & Performance"
-  const pack1 = new Map();
-  base.forEach((x) => pack1.set(x.name, x));
-  // Pack 2: "Recovery & Immune"
-  const pack2 = new Map();
-  base.forEach((x) => pack2.set(x.name, x));
-
-  const why1 = [];
-  const why2 = [];
-
-  // Training load
-  if (intake.trainingLoad === "high") {
-    pack2.set(SUPP.electrolytes.name, SUPP.electrolytes);
-    why2.push(
-      "High training load → add hydration/recovery support (electrolytes).",
-    );
-  } else if (intake.trainingLoad === "moderate") {
-    why2.push("Moderate load → keep recovery foundation consistent.");
-  } else {
-    why2.push("Lower load → keep a lighter foundation stack.");
-  }
-
-  // Phase
-  if (intake.phase === "luteal") {
-    pack1.set(SUPP.magnesium.name, SUPP.magnesium);
-    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    why1.push(
-      "Luteal phase → emphasize magnesium + B-vitamin support (conservative).",
-    );
-  }
-  if (intake.phase === "follicular") {
-    why1.push(
-      "Follicular phase → prioritize consistent foundation and energy support as needed.",
-    );
-  }
-
-  // Symptoms
-  const s = new Set(intake.symptoms);
-
-  if (s.has("fatigue")) {
-    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    pack1.set(SUPP.iron.name, SUPP.iron);
-    why1.push("Fatigue selected → consider lab-guided iron + B-vitamins.");
-  }
-
-  if (s.has("heavy-bleeding")) {
-    pack1.set(SUPP.iron.name, SUPP.iron);
-    pack1.set(SUPP.vitc.name, SUPP.vitc);
-    why1.push(
-      "Heavy bleeding selected → flag iron for clinician review; pair with vitamin C in some plans.",
-    );
-  }
-
-  if (s.has("cramps")) {
-    pack1.set(SUPP.magnesium.name, SUPP.magnesium);
-    pack1.set(SUPP.ginger.name, SUPP.ginger);
-    why1.push(
-      "Cramps selected → magnesium + ginger are common conservative additions.",
-    );
-  }
-
-  if (s.has("poor-sleep")) {
-    pack2.set(SUPP.magnesium.name, SUPP.magnesium);
-    pack2.set(SUPP.ltheanine.name, SUPP.ltheanine);
-    why2.push(
-      "Poor sleep selected → consider a gentle wind-down add-on (variable response).",
-    );
-  }
-
-  if (s.has("headaches")) {
-    pack2.set(SUPP.riboflavin.name, SUPP.riboflavin);
-    why2.push(
-      "Headaches selected → riboflavin is a common conservative option in some routines.",
-    );
-  }
-
-  if (s.has("bloating")) {
-    pack2.set(SUPP.probiotic.name, SUPP.probiotic);
-    why2.push(
-      "Bloating selected → some athletes trial probiotics for GI support.",
-    );
-  }
-
-  if (s.has("brain-fog")) {
-    pack1.set(SUPP.omega3.name, SUPP.omega3);
-    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    why1.push(
-      "Brain fog selected → omega-3 + B-vitamins are common conservative inclusions.",
-    );
-  }
-
-  if (s.has("mood-swings")) {
-    pack1.set(SUPP.omega3.name, SUPP.omega3);
-    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    why1.push(
-      "Mood swings selected → omega-3 + B-vitamins are common conservative inclusions.",
-    );
-  }
-
-  // If cycle irregular or on birth control, flag clinician review
-  const flags = [];
-  if (intake.cycleRegularity === "irregular")
-    flags.push(
-      "Irregular cycles: consider screening for contributing factors with a clinician.",
-    );
-  if (intake.cycleRegularity === "birth-control")
-    flags.push(
-      "Hormonal birth control: review interactions/contraindications for any add-ons.",
-    );
-
-  // Turn maps into arrays
-  const pack1Arr = [...pack1.values()];
-  const pack2Arr = [...pack2.values()];
-
-  // Ensure pack1 has at least 4 items
-  while (pack1Arr.length < 4) pack1Arr.push(SUPP.omega3);
-  while (pack2Arr.length < 4) pack2Arr.push(SUPP.omega3);
-
-  return {
-    summary: buildSummary(intake),
-    packs: [
-      {
-        title: "Anchor Pack 1",
-        subtitle: "Cycle + performance support (draft)",
-        items: pack1Arr,
-        why: uniqueNonEmpty(why1),
-      },
-      {
-        title: "Anchor Pack 2",
-        subtitle: "Recovery + immune support (draft)",
-        items: pack2Arr,
-        why: uniqueNonEmpty(why2),
-      },
-    ],
-    flags,
-  };
+function uniqueNonEmpty(arr) {
+  return [...new Set(arr.filter(Boolean))];
 }
 
-function buildSummary(intake) {
-  const parts = [];
-  parts.push(`${titleCase(intake.trainingLoad)} training load`);
-  parts.push(`${prettyPhase(intake.phase)} phase`);
-  if (intake.sport) parts.push(`Primary sport: ${intake.sport}`);
-  if (intake.symptoms?.length)
-    parts.push(`Symptoms: ${intake.symptoms.map(prettySymptom).join(", ")}`);
-  return parts.join(" • ");
+function titleCase(s) {
+  if (!s) return "";
+  return s[0].toUpperCase() + s.slice(1);
 }
 
 function prettyPhase(v) {
@@ -391,16 +252,138 @@ function prettySymptom(v) {
   return map[v] || v;
 }
 
-function titleCase(s) {
-  if (!s) return "";
-  return s[0].toUpperCase() + s.slice(1);
+function buildSummary(intake) {
+  const parts = [];
+  parts.push(`${titleCase(intake.trainingLoad)} training load`);
+  parts.push(`${prettyPhase(intake.phase)} phase`);
+  if (intake.sport) parts.push(`Primary sport: ${intake.sport}`);
+  if (intake.symptoms?.length)
+    parts.push(`Symptoms: ${intake.symptoms.map(prettySymptom).join(", ")}`);
+  return parts.join(" • ");
 }
 
-function uniqueNonEmpty(arr) {
-  return [...new Set(arr.filter(Boolean))];
+function buildStack(intake) {
+  const base = [SUPP.magnesium, SUPP.omega3, SUPP.vitd, SUPP.zinc];
+
+  const pack1 = new Map();
+  const pack2 = new Map();
+  base.forEach((x) => {
+    pack1.set(x.name, x);
+    pack2.set(x.name, x);
+  });
+
+  const why1 = [];
+  const why2 = [];
+
+  if (intake.trainingLoad === "high") {
+    pack2.set(SUPP.electrolytes.name, SUPP.electrolytes);
+    why2.push(
+      "High training load → add hydration/recovery support (electrolytes).",
+    );
+  } else if (intake.trainingLoad === "moderate") {
+    why2.push("Moderate load → keep recovery foundation consistent.");
+  } else {
+    why2.push("Lower load → keep a lighter foundation stack.");
+  }
+
+  if (intake.phase === "luteal") {
+    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
+    why1.push(
+      "Luteal phase → emphasize magnesium + B-vitamin support (conservative).",
+    );
+  } else if (intake.phase === "follicular") {
+    why1.push(
+      "Follicular phase → prioritize a steady foundation and energy support as needed.",
+    );
+  }
+
+  const s = new Set(intake.symptoms);
+
+  if (s.has("fatigue")) {
+    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
+    pack1.set(SUPP.iron.name, SUPP.iron);
+    why1.push("Fatigue selected → consider lab-guided iron + B-vitamins.");
+  }
+
+  if (s.has("heavy-bleeding")) {
+    pack1.set(SUPP.iron.name, SUPP.iron);
+    pack1.set(SUPP.vitc.name, SUPP.vitc);
+    why1.push(
+      "Heavy bleeding selected → flag iron for clinician review; vitamin C is paired in some plans.",
+    );
+  }
+
+  if (s.has("cramps")) {
+    pack1.set(SUPP.ginger.name, SUPP.ginger);
+    why1.push(
+      "Cramps selected → magnesium + ginger are common conservative additions.",
+    );
+  }
+
+  if (s.has("poor-sleep")) {
+    pack2.set(SUPP.ltheanine.name, SUPP.ltheanine);
+    why2.push(
+      "Poor sleep selected → gentle wind-down add-on (variable response).",
+    );
+  }
+
+  if (s.has("headaches")) {
+    pack2.set(SUPP.riboflavin.name, SUPP.riboflavin);
+    why2.push(
+      "Headaches selected → riboflavin is commonly used in some routines.",
+    );
+  }
+
+  if (s.has("bloating")) {
+    pack2.set(SUPP.probiotic.name, SUPP.probiotic);
+    why2.push(
+      "Bloating selected → some athletes trial probiotics for GI support.",
+    );
+  }
+
+  if (s.has("brain-fog") || s.has("mood-swings")) {
+    pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
+    why1.push(
+      "Cognition/mood selected → omega-3 + B-vitamins are common conservative inclusions.",
+    );
+  }
+
+  const flags = [];
+  if (intake.cycleRegularity === "irregular")
+    flags.push(
+      "Irregular cycles: consider screening for contributing factors with a clinician.",
+    );
+  if (intake.cycleRegularity === "birth-control")
+    flags.push(
+      "Hormonal birth control: review interactions/contraindications with a clinician.",
+    );
+
+  const pack1Arr = [...pack1.values()];
+  const pack2Arr = [...pack2.values()];
+  while (pack1Arr.length < 4) pack1Arr.push(SUPP.omega3);
+  while (pack2Arr.length < 4) pack2Arr.push(SUPP.omega3);
+
+  return {
+    summary: buildSummary(intake),
+    packs: [
+      {
+        title: "Anchor Pack 1",
+        subtitle: "Cycle + performance support (draft)",
+        items: pack1Arr,
+        why: uniqueNonEmpty(why1),
+      },
+      {
+        title: "Anchor Pack 2",
+        subtitle: "Recovery + immune support (draft)",
+        items: pack2Arr,
+        why: uniqueNonEmpty(why2),
+      },
+    ],
+    flags,
+  };
 }
 
-/* ---------------- Rendering ---------------- */
+/* --------- Rendering --------- */
 function pillSVG() {
   return `
   <svg width="74" height="52" viewBox="0 0 74 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -409,6 +392,15 @@ function pillSVG() {
     <circle cx="18" cy="38" r="8" fill="#bfe9ff" stroke="#ead2d2"/>
     <circle cx="44" cy="14" r="7" fill="#f5f0ff" stroke="#ead2d2"/>
   </svg>`;
+}
+
+function escapeHTML(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function renderResults(results, intake) {
@@ -425,16 +417,12 @@ function renderResults(results, intake) {
       .slice(0, 8)
       .map(
         (x) =>
-          `<li><strong>${escapeHTML(x.name)}</strong> <span class="muted">— ${escapeHTML(
-            x.note,
-          )}</span></li>`,
+          `<li><strong>${escapeHTML(x.name)}</strong> <span class="muted">— ${escapeHTML(x.note)}</span></li>`,
       )
       .join("");
 
     const why = pack.why?.length
-      ? `<div class="stack-why"><strong>Why this set:</strong><ul>${pack.why
-          .map((w) => `<li>${escapeHTML(w)}</li>`)
-          .join("")}</ul></div>`
+      ? `<div class="stack-why"><strong>Why this set:</strong><ul>${pack.why.map((w) => `<li>${escapeHTML(w)}</li>`).join("")}</ul></div>`
       : "";
 
     card.innerHTML = `
@@ -452,32 +440,29 @@ function renderResults(results, intake) {
     grid.appendChild(card);
   });
 
-  // Safety note: set content + unhide BEFORE animating
   const note = $("#safetyNote");
   note.hidden = false;
 
   if (results.flags?.length) {
     note.innerHTML = `
       <p><strong>Safety note:</strong> ${results.flags.map(escapeHTML).join(" ")}</p>
-      <p><strong>Prototype reminder:</strong> No diagnoses or prescriptions are provided here; a clinician must review.</p>
+      <p><strong>Prototype reminder:</strong> Educational only. No diagnoses or prescriptions are provided; a clinician must review.</p>
     `;
   } else {
     note.innerHTML = `
       <p><strong>Safety note:</strong> Recommendations are conservative and must be reviewed for interactions,
       conditions, and lab values (especially iron/vitamin D).</p>
-      <p><strong>Prototype reminder:</strong> No diagnoses or prescriptions are provided here; a clinician must review.</p>
+      <p><strong>Prototype reminder:</strong> Educational only. No diagnoses or prescriptions are provided; a clinician must review.</p>
     `;
   }
 
-  // Reset note animation classes
   note.classList.remove("reveal");
   note.classList.add("will-reveal");
 
-  // Stagger reveal after DOM paint
   requestAnimationFrame(() => {
     const cards = $$(".stack-card", grid);
     cards.forEach((c, i) => {
-      c.style.animationDelay = `${i * 90}ms`;
+      c.style.animationDelay = `${i * 110}ms`;
       c.classList.remove("will-reveal");
       c.classList.add("reveal");
     });
@@ -489,16 +474,7 @@ function renderResults(results, intake) {
   });
 }
 
-function escapeHTML(str) {
-  return String(str ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-/* ---------------- Storage ---------------- */
+/* --------- Storage --------- */
 function save(intake, results) {
   localStorage.setItem(
     STORAGE_KEY,
@@ -516,82 +492,8 @@ function loadSaved() {
   }
 }
 
-/* ---------------- Form wiring ---------------- */
-function initForm() {
-  const form = $("#intakeForm");
-  const clearBtn = $("#clearFormBtn");
-  if (!form) return;
-
-  // Restore prior intake (optional)
-  const saved = loadSaved();
-  if (saved?.intake) hydrateForm(form, saved.intake);
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const intake = getFormData(form);
-
-    // Immediately switch to Results tab and show skeleton
-    goTo("#results");
-    showResultsSkeleton();
-
-    // Start progress bar
-    showTopProgress();
-    setTopProgress(12);
-
-    // Simulated steps (so UX feels intentional)
-    await sleep(180);
-    setTopProgress(35);
-
-    await sleep(220);
-    setTopProgress(62);
-
-    await sleep(220);
-    setTopProgress(82);
-
-    // Build results (fast) — you can do this earlier too
-    const results = buildStack(intake);
-    save(intake, results);
-
-    // Small delay to let skeleton feel smooth (optional)
-    await sleep(120);
-
-    hideResultsSkeleton();
-    renderResults(results, intake);
-
-    // Finish progress
-    finishTopProgress();
-  });
-
-  clearBtn?.addEventListener("click", () => {
-    form.reset();
-    localStorage.removeItem(STORAGE_KEY);
-  });
-
-  // Plan selection buttons
-  $$("[data-plan]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const plan = btn.getAttribute("data-plan");
-      alert(
-        `Prototype: selected "${plan}".\nIn production, this would proceed to checkout (Stripe) + account creation.`,
-      );
-    });
-  });
-}
-function setActiveNav(hash) {
-  const current = (hash || "#home").split("?")[0] || "#home";
-
-  $$(".nav a").forEach((a) => {
-    const href = a.getAttribute("href");
-    const isActive = href === current;
-    a.classList.toggle("active", isActive);
-    if (isActive) a.setAttribute("aria-current", "page");
-    else a.removeAttribute("aria-current");
-  });
-}
-
+/* --------- Form wiring --------- */
 function hydrateForm(form, intake) {
-  // Radios
   if (intake.cycleRegularity) {
     const r = form.querySelector(
       `input[name="cycleRegularity"][value="${CSS.escape(intake.cycleRegularity)}"]`,
@@ -611,7 +513,6 @@ function hydrateForm(form, intake) {
     if (r) r.checked = true;
   }
 
-  // Select
   const sportSel = form.querySelector(`select[name="sport"]`);
   if (sportSel && intake.sport) {
     const options = [...sportSel.options].map((o) => o.value);
@@ -624,14 +525,12 @@ function hydrateForm(form, intake) {
     }
   }
 
-  // Date/notes
   const lmp = form.querySelector(`input[name="lmp"]`);
   if (lmp && intake.lmp) lmp.value = intake.lmp;
 
   const notes = form.querySelector(`textarea[name="notes"]`);
   if (notes && intake.notes) notes.value = intake.notes;
 
-  // Symptoms
   if (Array.isArray(intake.symptoms)) {
     intake.symptoms.forEach((v) => {
       const cb = form.querySelector(
@@ -642,9 +541,63 @@ function hydrateForm(form, intake) {
   }
 }
 
-/* ---------------- Init ---------------- */
-setYear();
-initRouter();
-initInternalLinks();
-initNavToggle();
-initForm();
+function initForm() {
+  const form = $("#intakeForm");
+  const clearBtn = $("#clearFormBtn");
+  if (!form) return;
+
+  const saved = loadSaved();
+  if (saved?.intake) hydrateForm(form, saved.intake);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const intake = getFormData(form);
+
+    // go to results and show skeleton immediately
+    navigateTo("#results");
+    showResultsSkeleton();
+
+    showTopProgress();
+    setTopProgress(12);
+
+    await sleep(220);
+    setTopProgress(34);
+    await sleep(260);
+    setTopProgress(58);
+    await sleep(260);
+    setTopProgress(78);
+
+    const results = buildStack(intake);
+    save(intake, results);
+
+    await sleep(180);
+
+    hideResultsSkeleton();
+    renderResults(results, intake);
+    finishTopProgress();
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    form.reset();
+    localStorage.removeItem(STORAGE_KEY);
+  });
+
+  $$("[data-plan]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const plan = btn.getAttribute("data-plan");
+      alert(
+        `Prototype: selected "${plan}".\nIn production, this would proceed to checkout + account creation.`,
+      );
+    });
+  });
+}
+
+/* --------- Init --------- */
+document.addEventListener("DOMContentLoaded", () => {
+  setYear();
+  initRouter();
+  initInternalLinks();
+  initNavToggle();
+  initForm();
+});
