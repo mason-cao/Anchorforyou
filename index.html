@@ -40,6 +40,10 @@
         </button>
       </div>
     </header>
+    <!-- Top loading progress (hidden by default) -->
+    <div class="top-progress" id="topProgress" aria-hidden="true">
+      <div class="top-progress-bar" id="topProgressBar"></div>
+    </div>
 
     <!-- Hero -->
     <main id="app">
@@ -450,6 +454,32 @@
               <a class="btn btn-ghost" href="#get-started">Edit responses</a>
               <a class="btn btn-primary" href="#plans">Choose a plan</a>
             </div>
+          </div>
+
+          <!-- Skeleton shown while generating -->
+          <div
+            class="grid results-grid skeleton-grid"
+            id="resultsSkeleton"
+            hidden
+            aria-hidden="true"
+          >
+            <article class="card stack-card skeleton-card">
+              <div class="skeleton-line w-40"></div>
+              <div class="skeleton-line w-70"></div>
+              <div class="skeleton-block"></div>
+              <div class="skeleton-line w-90"></div>
+              <div class="skeleton-line w-80"></div>
+              <div class="skeleton-line w-60"></div>
+            </article>
+
+            <article class="card stack-card skeleton-card">
+              <div class="skeleton-line w-45"></div>
+              <div class="skeleton-line w-65"></div>
+              <div class="skeleton-block"></div>
+              <div class="skeleton-line w-85"></div>
+              <div class="skeleton-line w-75"></div>
+              <div class="skeleton-line w-55"></div>
+            </article>
           </div>
 
           <div

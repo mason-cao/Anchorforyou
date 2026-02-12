@@ -55,26 +55,113 @@ function setYear() {
   const y = new Date().getFullYear();
   $("#year").textContent = y;
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function showTopProgress() {
+  const wrap = $("#topProgress");
+  const bar = $("#topProgressBar");
+  if (!wrap || !bar) return;
+  wrap.classList.add("show");
+  bar.style.width = "0%";
+}
+
+function setTopProgress(pct) {
+  const bar = $("#topProgressBar");
+  if (!bar) return;
+  bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+}
+
+function finishTopProgress() {
+  const wrap = $("#topProgress");
+  const bar = $("#topProgressBar");
+  if (!wrap || !bar) return;
+  setTopProgress(100);
+  setTimeout(() => {
+    wrap.classList.remove("show");
+    bar.style.width = "0%";
+  }, 250);
+}
+
+function showResultsSkeleton() {
+  const sk = $("#resultsSkeleton");
+  const grid = $("#resultsGrid");
+  if (grid) grid.innerHTML = "";
+  if (sk) sk.hidden = false;
+}
+
+function hideResultsSkeleton() {
+  const sk = $("#resultsSkeleton");
+  if (sk) sk.hidden = true;
+}
+
+/* If you're using the no-scroll router version, navigateTo exists.
+   This fallback keeps it working either way. */
+function goTo(hash) {
+  if (typeof navigateTo === "function") navigateTo(hash);
+  else location.hash = hash;
+}
 
 /* ---------------- Router ---------------- */
 function showView(hash) {
-  const id = (hash || "#home").replace("#", "");
-  const views = $$(".view");
-  views.forEach((v) => v.classList.remove("view-active"));
-  const target = document.getElementById(id) || document.getElementById("home");
-  target.classList.add("view-active");
+  setActiveNav(hash);
 
-  // If user lands on results, render from storage if available
-  if (id === "results") {
+  const id = (hash || "#home").replace("#", "");
+  const target = document.getElementById(id) || document.getElementById("home");
+  if (!target) return;
+
+  // hide all
+  $$(".view").forEach((v) => v.classList.remove("view-active", "view-anim"));
+
+  // show target + restart animation
+  target.classList.add("view-active");
+  void target.offsetWidth; // force reflow so animation restarts
+  target.classList.add("view-anim");
+
+  // Results behavior: show saved results OR show skeleton
+  if (target.id === "results") {
     const saved = loadSaved();
-    if (saved?.results) renderResults(saved.results, saved.intake);
+
+    if (saved?.results) {
+      hideResultsSkeleton(); // ✅ important
+      renderResults(saved.results, saved.intake);
+    } else {
+      showResultsSkeleton(); // ✅ optional: looks polished
+    }
+  } else {
+    // Not on results → keep skeleton hidden
+    hideResultsSkeleton();
   }
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function initRouter() {
-  window.addEventListener("hashchange", () => showView(location.hash));
+  window.addEventListener("popstate", () => {
+    showView(location.hash || "#home");
+  });
+
   showView(location.hash || "#home");
+}
+
+function navigateTo(hash, { replace = false } = {}) {
+  const url = new URL(window.location.href);
+  url.hash = hash;
+
+  if (replace) history.replaceState(null, "", url);
+  else history.pushState(null, "", url);
+
+  showView(hash);
+}
+
+function initInternalLinks() {
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+
+    const hash = a.getAttribute("href");
+    if (!hash || hash === "#") return;
+
+    e.preventDefault(); // stops scroll-to-anchor
+    navigateTo(hash);
+  });
 }
 
 /* ---------------- Mobile nav ---------------- */
@@ -332,18 +419,22 @@ function renderResults(results, intake) {
 
   results.packs.forEach((pack) => {
     const card = document.createElement("article");
-    card.className = "card stack-card";
+    card.className = "card stack-card will-reveal";
 
     const items = pack.items
       .slice(0, 8)
       .map(
         (x) =>
-          `<li><strong>${escapeHTML(x.name)}</strong> <span class="muted">— ${escapeHTML(x.note)}</span></li>`,
+          `<li><strong>${escapeHTML(x.name)}</strong> <span class="muted">— ${escapeHTML(
+            x.note,
+          )}</span></li>`,
       )
       .join("");
 
     const why = pack.why?.length
-      ? `<div class="stack-why"><strong>Why this set:</strong><ul>${pack.why.map((w) => `<li>${escapeHTML(w)}</li>`).join("")}</ul></div>`
+      ? `<div class="stack-why"><strong>Why this set:</strong><ul>${pack.why
+          .map((w) => `<li>${escapeHTML(w)}</li>`)
+          .join("")}</ul></div>`
       : "";
 
     card.innerHTML = `
@@ -354,7 +445,6 @@ function renderResults(results, intake) {
         </div>
         <div class="pill-art">${pillSVG()}</div>
       </div>
-
       <ul class="stack-list">${items}</ul>
       ${why}
     `;
@@ -362,10 +452,10 @@ function renderResults(results, intake) {
     grid.appendChild(card);
   });
 
+  // Safety note: set content + unhide BEFORE animating
   const note = $("#safetyNote");
   note.hidden = false;
 
-  // If flags exist, append to safety note
   if (results.flags?.length) {
     note.innerHTML = `
       <p><strong>Safety note:</strong> ${results.flags.map(escapeHTML).join(" ")}</p>
@@ -378,6 +468,25 @@ function renderResults(results, intake) {
       <p><strong>Prototype reminder:</strong> No diagnoses or prescriptions are provided here; a clinician must review.</p>
     `;
   }
+
+  // Reset note animation classes
+  note.classList.remove("reveal");
+  note.classList.add("will-reveal");
+
+  // Stagger reveal after DOM paint
+  requestAnimationFrame(() => {
+    const cards = $$(".stack-card", grid);
+    cards.forEach((c, i) => {
+      c.style.animationDelay = `${i * 90}ms`;
+      c.classList.remove("will-reveal");
+      c.classList.add("reveal");
+    });
+
+    requestAnimationFrame(() => {
+      note.classList.remove("will-reveal");
+      note.classList.add("reveal");
+    });
+  });
 }
 
 function escapeHTML(str) {
@@ -417,16 +526,41 @@ function initForm() {
   const saved = loadSaved();
   if (saved?.intake) hydrateForm(form, saved.intake);
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const intake = getFormData(form);
-    const results = buildStack(intake);
 
+    // Immediately switch to Results tab and show skeleton
+    goTo("#results");
+    showResultsSkeleton();
+
+    // Start progress bar
+    showTopProgress();
+    setTopProgress(12);
+
+    // Simulated steps (so UX feels intentional)
+    await sleep(180);
+    setTopProgress(35);
+
+    await sleep(220);
+    setTopProgress(62);
+
+    await sleep(220);
+    setTopProgress(82);
+
+    // Build results (fast) — you can do this earlier too
+    const results = buildStack(intake);
     save(intake, results);
+
+    // Small delay to let skeleton feel smooth (optional)
+    await sleep(120);
+
+    hideResultsSkeleton();
     renderResults(results, intake);
 
-    location.hash = "#results";
+    // Finish progress
+    finishTopProgress();
   });
 
   clearBtn?.addEventListener("click", () => {
@@ -442,6 +576,17 @@ function initForm() {
         `Prototype: selected "${plan}".\nIn production, this would proceed to checkout (Stripe) + account creation.`,
       );
     });
+  });
+}
+function setActiveNav(hash) {
+  const current = (hash || "#home").split("?")[0] || "#home";
+
+  $$(".nav a").forEach((a) => {
+    const href = a.getAttribute("href");
+    const isActive = href === current;
+    a.classList.toggle("active", isActive);
+    if (isActive) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
   });
 }
 
@@ -500,5 +645,6 @@ function hydrateForm(form, intake) {
 /* ---------------- Init ---------------- */
 setYear();
 initRouter();
+initInternalLinks();
 initNavToggle();
 initForm();
