@@ -1,7 +1,7 @@
-/* Anchor for You — prototype logic
+/* Anchor for You — logic
    - no-scroll SPA router (hash + history)
    - intake form -> rules engine -> renders results cards
-   - top progress bar + results skeleton
+   - top progress bar + glass skeleton loader
    - stores last results in localStorage
 */
 
@@ -87,16 +87,21 @@ function finishTopProgress() {
   }, 260);
 }
 
-function showResultsSkeleton() {
-  const sk = $("#resultsSkeleton");
+function showResultsLoading() {
+  const wrap = $("#resultsLoadingWrap");
   const grid = $("#resultsGrid");
   if (grid) grid.innerHTML = "";
-  if (sk) sk.hidden = false;
+  if (wrap) wrap.hidden = false;
 }
 
-function hideResultsSkeleton() {
-  const sk = $("#resultsSkeleton");
-  if (sk) sk.hidden = true;
+function hideResultsLoading() {
+  const wrap = $("#resultsLoadingWrap");
+  if (wrap) wrap.hidden = true;
+}
+
+function setResultsSummary(text) {
+  const el = $("#resultsSummary");
+  if (el) el.textContent = text;
 }
 
 /* --------- Router (no scroll) --------- */
@@ -127,13 +132,16 @@ function showView(hash) {
   if (target.id === "results") {
     const saved = loadSaved();
     if (saved?.results) {
-      hideResultsSkeleton();
-      renderResults(saved.results, saved.intake);
+      hideResultsLoading();
+      renderResults(saved.results);
     } else {
-      showResultsSkeleton();
+      hideResultsLoading();
+      setResultsSummary("Complete the intake to generate your stack.");
+      const grid = $("#resultsGrid");
+      if (grid) grid.innerHTML = "";
     }
   } else {
-    hideResultsSkeleton();
+    hideResultsLoading();
   }
 }
 
@@ -152,7 +160,6 @@ function initRouter() {
     showView(location.hash || "#home");
   });
 
-  // initial load
   showView(location.hash || "#home");
 }
 
@@ -181,7 +188,6 @@ function initNavToggle() {
     nav.classList.toggle("open", !expanded);
   });
 
-  // close after clicking a link (mobile)
   $$(".nav a").forEach((a) =>
     a.addEventListener("click", () => {
       if (window.innerWidth <= 720) {
@@ -191,7 +197,6 @@ function initNavToggle() {
     }),
   );
 
-  // close if resized to desktop
   window.addEventListener("resize", () => {
     if (window.innerWidth > 720) {
       nav.classList.remove("open");
@@ -277,23 +282,19 @@ function buildStack(intake) {
 
   if (intake.trainingLoad === "high") {
     pack2.set(SUPP.electrolytes.name, SUPP.electrolytes);
-    why2.push(
-      "High training load → add hydration/recovery support (electrolytes).",
-    );
+    why2.push("High training load → hydration/recovery emphasis.");
   } else if (intake.trainingLoad === "moderate") {
-    why2.push("Moderate load → keep recovery foundation consistent.");
+    why2.push("Moderate load → consistent recovery foundation.");
   } else {
-    why2.push("Lower load → keep a lighter foundation stack.");
+    why2.push("Lower load → streamlined foundation.");
   }
 
   if (intake.phase === "luteal") {
     pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    why1.push(
-      "Luteal phase → emphasize magnesium + B-vitamin support (conservative).",
-    );
+    why1.push("Luteal phase → magnesium + B-vitamin support focus.");
   } else if (intake.phase === "follicular") {
     why1.push(
-      "Follicular phase → prioritize a steady foundation and energy support as needed.",
+      "Follicular phase → steady foundation with energy support as needed.",
     );
   }
 
@@ -302,61 +303,43 @@ function buildStack(intake) {
   if (s.has("fatigue")) {
     pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
     pack1.set(SUPP.iron.name, SUPP.iron);
-    why1.push("Fatigue selected → consider lab-guided iron + B-vitamins.");
+    why1.push("Fatigue selected → iron + B-vitamins considered (lab-guided).");
   }
 
   if (s.has("heavy-bleeding")) {
     pack1.set(SUPP.iron.name, SUPP.iron);
     pack1.set(SUPP.vitc.name, SUPP.vitc);
     why1.push(
-      "Heavy bleeding selected → flag iron for clinician review; vitamin C is paired in some plans.",
+      "Heavy bleeding selected → iron paired with vitamin C in some plans.",
     );
   }
 
   if (s.has("cramps")) {
     pack1.set(SUPP.ginger.name, SUPP.ginger);
-    why1.push(
-      "Cramps selected → magnesium + ginger are common conservative additions.",
-    );
+    why1.push("Cramps selected → magnesium + ginger commonly paired.");
   }
 
   if (s.has("poor-sleep")) {
     pack2.set(SUPP.ltheanine.name, SUPP.ltheanine);
-    why2.push(
-      "Poor sleep selected → gentle wind-down add-on (variable response).",
-    );
+    why2.push("Poor sleep selected → wind-down support add-on.");
   }
 
   if (s.has("headaches")) {
     pack2.set(SUPP.riboflavin.name, SUPP.riboflavin);
-    why2.push(
-      "Headaches selected → riboflavin is commonly used in some routines.",
-    );
+    why2.push("Headaches selected → riboflavin often included in routines.");
   }
 
   if (s.has("bloating")) {
     pack2.set(SUPP.probiotic.name, SUPP.probiotic);
-    why2.push(
-      "Bloating selected → some athletes trial probiotics for GI support.",
-    );
+    why2.push("Bloating selected → probiotic trial option.");
   }
 
   if (s.has("brain-fog") || s.has("mood-swings")) {
     pack1.set(SUPP.bcomplex.name, SUPP.bcomplex);
     why1.push(
-      "Cognition/mood selected → omega-3 + B-vitamins are common conservative inclusions.",
+      "Cognition/mood selected → omega-3 + B-vitamins commonly included.",
     );
   }
-
-  const flags = [];
-  if (intake.cycleRegularity === "irregular")
-    flags.push(
-      "Irregular cycles: consider screening for contributing factors with a clinician.",
-    );
-  if (intake.cycleRegularity === "birth-control")
-    flags.push(
-      "Hormonal birth control: review interactions/contraindications with a clinician.",
-    );
 
   const pack1Arr = [...pack1.values()];
   const pack2Arr = [...pack2.values()];
@@ -368,18 +351,17 @@ function buildStack(intake) {
     packs: [
       {
         title: "Anchor Pack 1",
-        subtitle: "Cycle + performance support (draft)",
+        subtitle: "Cycle + performance support",
         items: pack1Arr,
         why: uniqueNonEmpty(why1),
       },
       {
         title: "Anchor Pack 2",
-        subtitle: "Recovery + immune support (draft)",
+        subtitle: "Recovery + immune support",
         items: pack2Arr,
         why: uniqueNonEmpty(why2),
       },
     ],
-    flags,
   };
 }
 
@@ -403,8 +385,9 @@ function escapeHTML(str) {
     .replaceAll("'", "&#039;");
 }
 
-function renderResults(results, intake) {
-  $("#resultsSummary").textContent = results.summary;
+function renderResults(results) {
+  hideResultsLoading();
+  setResultsSummary(results.summary);
 
   const grid = $("#resultsGrid");
   grid.innerHTML = "";
@@ -440,36 +423,12 @@ function renderResults(results, intake) {
     grid.appendChild(card);
   });
 
-  const note = $("#safetyNote");
-  note.hidden = false;
-
-  if (results.flags?.length) {
-    note.innerHTML = `
-      <p><strong>Safety note:</strong> ${results.flags.map(escapeHTML).join(" ")}</p>
-      <p><strong>Prototype reminder:</strong> Educational only. No diagnoses or prescriptions are provided; a clinician must review.</p>
-    `;
-  } else {
-    note.innerHTML = `
-      <p><strong>Safety note:</strong> Recommendations are conservative and must be reviewed for interactions,
-      conditions, and lab values (especially iron/vitamin D).</p>
-      <p><strong>Prototype reminder:</strong> Educational only. No diagnoses or prescriptions are provided; a clinician must review.</p>
-    `;
-  }
-
-  note.classList.remove("reveal");
-  note.classList.add("will-reveal");
-
   requestAnimationFrame(() => {
     const cards = $$(".stack-card", grid);
     cards.forEach((c, i) => {
       c.style.animationDelay = `${i * 110}ms`;
       c.classList.remove("will-reveal");
       c.classList.add("reveal");
-    });
-
-    requestAnimationFrame(() => {
-      note.classList.remove("will-reveal");
-      note.classList.add("reveal");
     });
   });
 }
@@ -481,7 +440,6 @@ function save(intake, results) {
     JSON.stringify({ intake, results, savedAt: Date.now() }),
   );
 }
-
 function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -554,40 +512,41 @@ function initForm() {
 
     const intake = getFormData(form);
 
-    // go to results and show skeleton immediately
     navigateTo("#results");
-    showResultsSkeleton();
+    showResultsLoading();
 
     showTopProgress();
-    setTopProgress(12);
+    setTopProgress(10);
 
-    await sleep(220);
-    setTopProgress(34);
-    await sleep(260);
-    setTopProgress(58);
-    await sleep(260);
-    setTopProgress(78);
+    await sleep(240);
+    setTopProgress(32);
+    await sleep(280);
+    setTopProgress(56);
+    await sleep(280);
+    setTopProgress(76);
 
     const results = buildStack(intake);
     save(intake, results);
 
-    await sleep(180);
+    await sleep(220);
 
-    hideResultsSkeleton();
-    renderResults(results, intake);
+    renderResults(results);
     finishTopProgress();
   });
 
   clearBtn?.addEventListener("click", () => {
     form.reset();
     localStorage.removeItem(STORAGE_KEY);
+    setResultsSummary("Complete the intake to generate your stack.");
+    const grid = $("#resultsGrid");
+    if (grid) grid.innerHTML = "";
   });
 
   $$("[data-plan]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const plan = btn.getAttribute("data-plan");
       alert(
-        `Prototype: selected "${plan}".\nIn production, this would proceed to checkout + account creation.`,
+        `Selected "${plan}".\n(Connect checkout + accounts in production.)`,
       );
     });
   });
