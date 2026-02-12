@@ -604,27 +604,6 @@ textarea {
   .hero-title {
     font-size: 38px;
   }
-  /* ---------- Smooth UI defaults ---------- */
-  :root {
-    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-    --t-fast: 160ms;
-    --t-med: 320ms;
-  }
-
-  .nav a,
-  .btn,
-  .card,
-  select,
-  input,
-  textarea {
-    transition:
-      background var(--t-fast) var(--ease),
-      color var(--t-fast) var(--ease),
-      border-color var(--t-fast) var(--ease),
-      box-shadow var(--t-med) var(--ease),
-      transform var(--t-fast) var(--ease),
-      opacity var(--t-med) var(--ease);
-  }
 
   /* Slight lift on hover */
   .btn:hover {
@@ -797,16 +776,121 @@ textarea {
       transition: none !important;
     }
   }
-  /* ---------- Top progress bar ---------- */
+  /* ============================
+   Luxury motion + loading UI
+   (GLOBAL — keep outside @media)
+   ============================ */
+
+  :root {
+    --ease-lux: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-fast: 180ms;
+    --dur-med: 480ms;
+    --dur-slow: 780ms;
+  }
+
+  /* Smooth interactions */
+  .nav a,
+  .btn,
+  .card,
+  select,
+  input,
+  textarea {
+    transition:
+      transform var(--dur-med) var(--ease-lux),
+      box-shadow var(--dur-med) var(--ease-lux),
+      background var(--dur-med) var(--ease-lux),
+      border-color var(--dur-med) var(--ease-lux),
+      color var(--dur-fast) var(--ease-lux),
+      opacity var(--dur-med) var(--ease-lux),
+      filter var(--dur-med) var(--ease-lux);
+    will-change: transform, opacity, filter;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Router view animation (used by .view-anim in JS) */
+  .view {
+    display: none;
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    filter: blur(2px);
+  }
+
+  .view.view-active {
+    display: block;
+  }
+
+  .view.view-anim {
+    animation: viewIn var(--dur-med) var(--ease-lux) both;
+  }
+
+  @keyframes viewIn {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+      filter: blur(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* Results reveal */
+  .stack-card.will-reveal {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+    filter: blur(2px);
+  }
+
+  .stack-card.reveal {
+    animation: cardIn var(--dur-slow) var(--ease-lux) both;
+  }
+
+  @keyframes cardIn {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* Safety note reveal */
+  #safetyNote.will-reveal {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(2px);
+  }
+
+  #safetyNote.reveal {
+    animation: noteIn var(--dur-med) var(--ease-lux) both;
+  }
+
+  @keyframes noteIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  /* Top progress bar */
   .top-progress {
     position: sticky;
-    top: 66px; /* same as header height */
-    z-index: 60;
+    top: 66px; /* header height */
+    z-index: 9999;
     height: 3px;
     background: transparent;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: opacity var(--dur-fast) var(--ease-soft);
   }
 
   .top-progress.show {
@@ -818,11 +902,11 @@ textarea {
     width: 0%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--brand), var(--brand2));
-    box-shadow: 0 10px 22px rgba(154, 43, 58, 0.18);
-    transition: width 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 12px 26px rgba(154, 43, 58, 0.14);
+    transition: width var(--dur-med) var(--ease-lux);
   }
 
-  /* ---------- Skeleton loading ---------- */
+  /* Skeleton shimmer */
   .skeleton-card {
     padding: 18px;
   }
@@ -831,7 +915,7 @@ textarea {
   .skeleton-block {
     border-radius: 12px;
     border: 1px solid var(--line);
-    background: #ffffff8a;
+    background: rgba(255, 255, 255, 0.6);
     position: relative;
     overflow: hidden;
   }
@@ -840,7 +924,6 @@ textarea {
     height: 14px;
     margin: 10px 0;
   }
-
   .skeleton-block {
     height: 70px;
     margin: 14px 0;
@@ -888,10 +971,10 @@ textarea {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.4),
       transparent
     );
-    animation: shimmer 1.15s infinite;
+    animation: shimmer 1.35s var(--ease-soft) infinite;
   }
 
   @keyframes shimmer {
@@ -905,11 +988,8 @@ textarea {
 
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .skeleton-line::after,
-    .skeleton-block::after {
+    * {
       animation: none !important;
-    }
-    .top-progress-bar {
       transition: none !important;
     }
   }
