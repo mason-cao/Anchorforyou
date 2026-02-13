@@ -461,15 +461,6 @@ textarea:focus-visible {
   background: #ffffffd6;
 }
 
-.note {
-  margin-top: 18px;
-  background: #ffffff85;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  color: var(--muted);
-}
-
 /* Form */
 .form {
   margin-top: 18px;
@@ -566,14 +557,29 @@ textarea {
 .btn:hover {
   transform: translateY(-1px);
 }
+
+/* Primary red */
 .btn-primary {
   border-color: rgba(154, 43, 58, 0.25);
   background: linear-gradient(135deg, var(--brand), var(--brand2));
   color: white;
   box-shadow: 0 14px 30px rgba(154, 43, 58, 0.2);
 }
+
+/* Keep ghost hover subtle elsewhere */
 .btn-ghost:hover {
   background: #fff;
+}
+
+/* Force all plan Select buttons to the same red */
+.plan .btn {
+  border-color: rgba(154, 43, 58, 0.25);
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color: white;
+  box-shadow: 0 14px 30px rgba(154, 43, 58, 0.2);
+}
+.plan .btn:hover {
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
 }
 
 /* Results */
