@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -7,7 +8,7 @@
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Anchor for You — Stability When It Matters Most</title>
+    <title>Anchor for You - Stability When It Matters Most</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -37,6 +38,7 @@
           <a href="#get-started" class="nav-cta">Get Started</a>
           <a href="#results">Results</a>
           <a href="#plans">Subscription</a>
+          <a href="#credits">Credits</a>
         </nav>
 
         <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
@@ -61,57 +63,67 @@
                 Cycle-aware support for female athletes.
               </h1>
               <p class="hero-subtitle">
-                Anchor for You builds a refined supplement stack draft around
-                your cycle, training load, and symptoms—delivered monthly.
+                Anchor for You is a cycle-specific micronutrient decision engine
+                that translates cycle timing, training volume, and symptoms into
+                phase-aligned recommendations.
               </p>
 
               <div class="hero-actions">
                 <a class="btn btn-primary" href="#get-started"
-                  >Build my stack</a
+                  >Start Building your Journey</a
                 >
                 <a class="btn btn-ghost" href="#supplements"
                   >See what’s inside</a
                 >
               </div>
-
-              <div class="micro">
-                Built for performance consistency, recovery support, and a
-                calmer month.
-              </div>
             </div>
 
-            <div class="hero-card card">
-              <div class="card-glow" aria-hidden="true"></div>
-              <div class="hero-card-inner">
-                <h3>What is Anchor?</h3>
-                <p>
-                  Anchor helps athletes align nutrition support with cycle
-                  phases and real-time symptoms—so your plan feels stable even
-                  when your month isn’t.
-                </p>
+            <!-- Right side: integrated hero image + card (image sits behind softly) -->
+            <div class="hero-right">
+              <div class="hero-brand-art" aria-hidden="true">
+                <img
+                  src="anchor-hero.png"
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
 
-                <div class="mini-stats">
-                  <div class="mini-stat">
-                    <span class="mini-stat-num">Cycle-aware</span>
-                    <span class="mini-stat-label"
-                      >Personalized stack logic</span
-                    >
+              <div class="hero-card card">
+                <div class="card-glow" aria-hidden="true"></div>
+                <div class="hero-card-inner">
+                  <h3>What is Anchor?</h3>
+                  <p>
+                    A structured, phase-aware approach that adapts your
+                    supplement plan using cycle phase, training volume, and
+                    symptom inputs so support stays aligned across the month.
+                  </p>
+
+                  <div class="mini-stats">
+                    <div class="mini-stat">
+                      <span class="mini-stat-num">Phase-aligned</span>
+                      <span class="mini-stat-label"
+                        >Follicular • Ovulatory • Luteal • Menstrual</span
+                      >
+                    </div>
+                    <div class="mini-stat">
+                      <span class="mini-stat-num">Evidence-informed</span>
+                      <span class="mini-stat-label"
+                        >Logic organized around sports nutrition research</span
+                      >
+                    </div>
+                    <div class="mini-stat">
+                      <span class="mini-stat-num">Subscription</span>
+                      <span class="mini-stat-label"
+                        >Monthly cadence for consistent access</span
+                      >
+                    </div>
                   </div>
-                  <div class="mini-stat">
-                    <span class="mini-stat-num">Monthly</span>
-                    <span class="mini-stat-label">Subscription delivery</span>
-                  </div>
-                  <div class="mini-stat">
-                    <span class="mini-stat-num">Refined</span>
-                    <span class="mini-stat-label"
-                      >Designed for consistency</span
-                    >
-                  </div>
+
+                  <a class="link-arrow" href="#get-started"
+                    >Get started <span aria-hidden="true">→</span></a
+                  >
                 </div>
-
-                <a class="link-arrow" href="#get-started"
-                  >Get started <span aria-hidden="true">→</span></a
-                >
               </div>
             </div>
           </div>
@@ -122,9 +134,10 @@
         <section class="container section">
           <h2 class="section-title">Why cycle-aware support matters</h2>
           <p class="section-body">
-            Training demand + cycle-related shifts can influence recovery,
-            perceived energy, and day-to-day consistency. A structured approach
-            helps you stay steady—especially during higher load weeks.
+            Hormonal fluctuations across the cycle influence thermoregulation,
+            metabolism, sleep quality, fluid balance, neuromuscular function,
+            and symptom burden. A phase-aware framework supports stable planning
+            across changing physiological conditions.
           </p>
         </section>
       </section>
@@ -139,92 +152,151 @@
           <div class="section-head">
             <h2 class="section-title">Supplement Information</h2>
             <p class="section-body">
-              A transparent overview of common components used in
-              athlete-friendly stacks.
+              A clinically styled overview of common micronutrients used in
+              athlete stacks. Category pills link to available background
+              sources when included.
             </p>
           </div>
 
           <div class="grid cards">
+            <!-- Iron -->
             <article class="card">
               <h3>Iron</h3>
               <p>
-                Often considered when fatigue or heavy bleeding is present. Best
-                tailored to labs and tolerance.
+                Relevant to oxygen transport and endurance capacity. Considered
+                when fatigue is present or when menstrual blood loss is higher.
+                Monitoring iron status helps guide appropriate use.
               </p>
+
               <ul class="tags">
-                <li>Energy</li>
-                <li>Blood health</li>
-                <li>Lab-guided</li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/39536912/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Energy</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/39536912/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Blood health</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/39536912/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Lab-guided</a
+                  >
+                </li>
               </ul>
             </article>
 
+            <!-- Magnesium -->
             <article class="card">
               <h3>Magnesium</h3>
               <p>
-                Commonly used for muscle function and recovery support;
-                sometimes included for cramps.
+                Supports neuromuscular signaling and normal muscle contraction.
+                Commonly included for recovery routines and symptom-focused
+                support during higher-burden phases.
               </p>
+
               <ul class="tags">
-                <li>Recovery</li>
-                <li>Muscle</li>
-                <li>Wind-down</li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/28846654/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Recovery</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/28846654/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Muscle</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="tag-link"
+                    href="https://pubmed.ncbi.nlm.nih.gov/28846654/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Sleep</a
+                  >
+                </li>
               </ul>
             </article>
 
+            <!-- Omega-3 -->
             <article class="card">
               <h3>Omega-3</h3>
               <p>
-                Often included as a general recovery foundation and wellness
-                support.
+                A foundation component commonly used to support recovery and
+                overall wellness. Often selected for consistent baseline
+                coverage across phases.
               </p>
               <ul class="tags">
-                <li>Foundation</li>
-                <li>Recovery</li>
-                <li>Wellness</li>
+                <li><span class="tag-pill">Foundation</span></li>
+                <li><span class="tag-pill">Recovery</span></li>
+                <li><span class="tag-pill">Wellness</span></li>
               </ul>
             </article>
 
+            <!-- Vitamin D -->
             <article class="card">
               <h3>Vitamin D</h3>
-              <p>Often guided by testing; dosing varies by individual.</p>
+              <p>
+                Often selected based on baseline status. Commonly paired with
+                training blocks that require long-term recovery consistency and
+                foundational support.
+              </p>
               <ul class="tags">
-                <li>Immune</li>
-                <li>Bone</li>
-                <li>Lab-guided</li>
+                <li><span class="tag-pill">Immune</span></li>
+                <li><span class="tag-pill">Bone</span></li>
+                <li><span class="tag-pill">Test-informed</span></li>
               </ul>
             </article>
 
+            <!-- Zinc -->
             <article class="card">
               <h3>Zinc</h3>
               <p>
-                Commonly included as a conservative foundation component—avoid
-                excess long-term.
+                A conservative foundation option often used to support immune
+                function. Total daily intake matters when stacking.
               </p>
               <ul class="tags">
-                <li>Immune</li>
-                <li>Foundation</li>
-                <li>Conservative</li>
+                <li><span class="tag-pill">Immune</span></li>
+                <li><span class="tag-pill">Foundation</span></li>
+                <li><span class="tag-pill">Conservative</span></li>
               </ul>
             </article>
 
+            <!-- Electrolytes -->
             <article class="card">
               <h3>Electrolytes</h3>
               <p>
-                Often used to support higher load weeks and hydration needs.
+                Often emphasized during high-volume training periods. Supports
+                hydration routines when sweat loss and training frequency
+                increase.
               </p>
               <ul class="tags">
-                <li>Hydration</li>
-                <li>Load</li>
-                <li>Recovery</li>
+                <li><span class="tag-pill">Hydration</span></li>
+                <li><span class="tag-pill">Load</span></li>
+                <li><span class="tag-pill">Recovery</span></li>
               </ul>
             </article>
-          </div>
-
-          <div class="note">
-            <p>
-              Ingredient selection and dosing are individualized—your clinician
-              can help confirm fit for your history.
-            </p>
           </div>
         </div>
       </section>
@@ -235,8 +307,8 @@
           <div class="section-head">
             <h2 class="section-title">Let’s Get Started</h2>
             <p class="section-body">
-              Select what best describes you. We’ll generate a personalized
-              stack.
+              Select what best describes you. We’ll generate a phase-aligned
+              stack based on cycle timing, training volume, and symptoms.
             </p>
           </div>
 
@@ -306,9 +378,9 @@
                 </label>
               </fieldset>
 
-              <!-- Training Load -->
+              <!-- Training Volume -->
               <fieldset class="fieldset">
-                <legend>Training Load</legend>
+                <legend>Weekly Training Volume</legend>
                 <label class="check"
                   ><input
                     type="radio"
@@ -316,28 +388,33 @@
                     value="low"
                     required
                   />
-                  Light (off-season / recovery)</label
+                  &lt;5 hrs/week (recreational / low to moderate
+                  intensity)</label
                 >
                 <label class="check"
                   ><input type="radio" name="trainingLoad" value="moderate" />
-                  Moderate (in-season)</label
+                  5-10 hrs/week (competitive / moderate intensity)</label
                 >
                 <label class="check"
-                  ><input type="radio" name="trainingLoad" value="high" /> High
-                  (peak / tournament phase)</label
+                  ><input type="radio" name="trainingLoad" value="high" />
+                  &gt;10 hrs/week (elite / high intensity)</label
                 >
               </fieldset>
 
               <!-- Menstrual phase -->
               <fieldset class="fieldset">
-                <legend>Menstrual Phase</legend>
+                <legend>Current Cycle Phase</legend>
                 <label class="check"
                   ><input
                     type="radio"
                     name="phase"
-                    value="follicular"
+                    value="menstrual"
                     required
                   />
+                  Menstrual (on your period)</label
+                >
+                <label class="check"
+                  ><input type="radio" name="phase" value="follicular" />
                   Follicular</label
                 >
                 <label class="check"
@@ -439,7 +516,7 @@
             <div>
               <h2 class="section-title">Results</h2>
               <p class="section-body" id="resultsSummary">
-                Complete the intake to generate your stack.
+                Submit your intake to generate a phase-aligned plan.
               </p>
             </div>
             <div class="results-actions">
@@ -452,13 +529,14 @@
           <div class="results-loading-wrap" id="resultsLoadingWrap" hidden>
             <div class="results-loading-head">
               <div class="loading-title">
-                Generating your stack
+                Building your plan
                 <span class="dots" aria-hidden="true">
                   <span>.</span><span>.</span><span>.</span>
                 </span>
               </div>
               <div class="loading-sub">
-                Calibrating to your cycle, training load, and selected symptoms.
+                Phase alignment, training volume calibration, and symptom
+                targeting in progress.
               </div>
             </div>
 
@@ -505,52 +583,95 @@
             </p>
           </div>
 
+          <!-- Recommendation box -->
+          <article class="card rec-card" id="tierRecCard">
+            <h3>Not sure which tier to get?</h3>
+            <p class="muted" id="tierRecText">
+              Complete the Get Started form to receive a recommendation based on
+              your results.
+            </p>
+            <ul
+              class="tier-reasons"
+              id="tierRecReasons"
+              aria-live="polite"
+            ></ul>
+
+            <div class="rec-actions">
+              <a class="btn btn-ghost" href="#get-started"
+                >Update my responses</a
+              >
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="refreshTierRecBtn"
+              >
+                Get recommendation
+              </button>
+            </div>
+          </article>
+
           <div class="grid plans">
-            <article class="card plan">
-              <h3>Foundation</h3>
-              <p class="plan-price">$29<span>/mo</span></p>
+            <article class="card plan" data-plan-card="Anchor Core">
+              <h3>Anchor Core</h3>
+              <p class="plan-price">$7.99<span>/mo</span></p>
               <ul class="plan-list">
-                <li>Base stack</li>
-                <li>Monthly delivery</li>
-                <li>Quarterly refresh</li>
+                <li>Recreational / &lt;5 hrs/week</li>
+                <li>Basic symptom tracking</li>
+                <li>Phase-aligned foundation stack</li>
               </ul>
-              <button class="btn btn-ghost" data-plan="Foundation">
+              <button class="btn btn-ghost" data-plan="Anchor Core">
                 Select
               </button>
             </article>
 
-            <article class="card plan plan-featured">
+            <article
+              class="card plan plan-featured"
+              data-plan-card="Anchor Performance"
+            >
               <div class="badge">Most Popular</div>
-              <h3>Performance</h3>
-              <p class="plan-price">$49<span>/mo</span></p>
+              <h3>Anchor Performance</h3>
+              <p class="plan-price">$12.99<span>/mo</span></p>
               <ul class="plan-list">
-                <li>Personalized stack</li>
-                <li>Cycle-phase adjustments</li>
-                <li>Priority support</li>
+                <li>Competitive / 5-10 hrs/week</li>
+                <li>Expanded micronutrient support</li>
+                <li>Smarter adjusted dosing</li>
               </ul>
-              <button class="btn btn-primary" data-plan="Performance">
+              <button class="btn btn-primary" data-plan="Anchor Performance">
                 Select
               </button>
             </article>
 
-            <article class="card plan">
-              <h3>Elite</h3>
-              <p class="plan-price">$79<span>/mo</span></p>
+            <article class="card plan" data-plan-card="Anchor Elite">
+              <h3>Anchor Elite</h3>
+              <p class="plan-price">$19.99<span>/mo</span></p>
               <ul class="plan-list">
-                <li>Personalized stack + add-ons</li>
-                <li>Monthly refresh</li>
-                <li>Training load tuning</li>
+                <li>Elite / &gt;10 hrs/week</li>
+                <li>Advanced personalization + higher-frequency adjustments</li>
+                <li>Strava + Apple Health integration</li>
               </ul>
-              <button class="btn btn-ghost" data-plan="Elite">Select</button>
+              <button class="btn btn-ghost" data-plan="Anchor Elite">
+                Select
+              </button>
             </article>
           </div>
 
           <div class="note">
             <p>
-              Shipping, fulfillment, and clinical review workflows can be
-              connected in production.
+              Shipping, fulfillment, and account workflows can be connected in
+              production.
             </p>
           </div>
+        </div>
+      </section>
+
+      <!-- Credits -->
+      <section id="credits" class="view" aria-label="Credits">
+        <div class="container section">
+          <div class="section-head">
+            <h2 class="section-title">Credits</h2>
+            <p class="section-body"></p>
+          </div>
+          <div id="creditsContent"></div>
         </div>
       </section>
 
@@ -560,10 +681,6 @@
             <p>
               © <span id="year"></span> Anchor for You. All rights reserved.
             </p>
-            <p class="legal">
-              Information on this site is not medical advice. Consult a licensed
-              clinician before starting supplements.
-            </p>
           </div>
 
           <p class="footer-links">
@@ -571,6 +688,7 @@
             <a href="#supplements">Supplement Info</a>
             <a href="#get-started">Get Started</a>
             <a href="#plans">Subscription</a>
+            <a href="#credits">Credits</a>
           </p>
         </div>
       </footer>
