@@ -1,10 +1,15 @@
 /* app.js
    Anchor for You logic
    - no-scroll SPA router (hash + history)
-   - intake form -> rules engine -> renders results cards
+   - intake form -> rules engine -> renders results cards (WITH DOSAGES)
    - top progress bar + glass skeleton loader
    - stores last results in localStorage
    - subscription tier recommendation based on intake/results
+   - Stripe checkout via Payment Links (GitHub Pages-friendly)
+
+   Notes:
+   - Omega-3 REMOVED from logic
+   - Weekly training is split into HOURS + INTENSITY
 */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -12,67 +17,236 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 const STORAGE_KEY = "anchorforyou_intake_v1";
 
-/* --------- Data --------- */
+/* --------- Stripe Checkout (Payment Links) --------- */
+const STRIPE_PAYMENT_LINKS = {
+  core: "https://buy.stripe.com/test_bJe8wPfTtgI08vw1weaMU04",
+  performance: "https://buy.stripe.com/test_5kQ00jdLlfDW7rsej0aMU03",
+  elite: "https://buy.stripe.com/test_eVq8wP4aL8bu7rsfn4aMU05",
+};
+
+function normalizeTierName(name) {
+  const n = String(name || "").toLowerCase();
+  if (n.includes("core")) return "core";
+  if (n.includes("performance")) return "performance";
+  if (n.includes("elite")) return "elite";
+  if (n === "core") return "core";
+  if (n === "performance") return "performance";
+  if (n === "elite") return "elite";
+  return null;
+}
+
+function startCheckout(tierLabel) {
+  const key = normalizeTierName(tierLabel);
+  const url = key ? STRIPE_PAYMENT_LINKS[key] : null;
+
+  if (!url) {
+    alert("Checkout link not set for this plan yet.");
+    return;
+  }
+  window.location.href = url;
+}
+
+function initCheckout() {
+  $$("[data-plan]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const plan = btn.getAttribute("data-plan");
+      startCheckout(plan);
+    });
+  });
+}
+
+/* --------- Data (Omega-3 removed) --------- */
 const SUPP = {
+  folate: {
+    name: "Folate",
+    note: "Vital for red blood cell production, hormonal balance, and energy metabolism—supporting endurance, recovery, and long-term reproductive health.",
+  },
   iron: {
     name: "Iron",
-    note: "Supports oxygen transport and endurance capacity; selected when fatigue or higher blood loss is reported.",
+    note: "Essential for oxygen delivery to muscles (endurance/VO₂ max). Female endurance athletes are at higher risk due to menstrual + sweat loss—lab-guided monitoring helps.",
   },
   magnesium: {
     name: "Magnesium",
-    note: "Supports neuromuscular signaling and normal muscle contraction; commonly used in recovery routines.",
+    note: "Supports neuromuscular signaling, muscle relaxation, and stress regulation. Often emphasized in luteal/PMS support; lost through sweat at higher loads.",
   },
-  omega3: {
-    name: "Omega-3",
-    note: "Foundation component commonly used to support recovery consistency and general wellness.",
-  },
-  vitd: {
-    name: "Vitamin D",
-    note: "Often selected as foundational support, especially when baseline status suggests a need for coverage.",
+  calcium: {
+    name: "Calcium",
+    note: "Key for bone integrity and muscle contraction. Especially important with menstrual dysfunction/RED-S risk (pair with vitamin D).",
   },
   zinc: {
     name: "Zinc",
-    note: "Conservative foundation option frequently used to support immune function when stacking.",
+    note: "Supports immune health, recovery, protein synthesis, and hormone signaling—can help during PMS-related symptom burden.",
   },
-  electrolytes: {
-    name: "Electrolytes",
-    note: "Emphasized during high-volume training periods to support hydration routines.",
-  },
-  bcomplex: {
-    name: "B-complex (B6/B12/folate)",
-    note: "Supportive micronutrient option often used in performance-focused routines when symptom burden increases.",
-  },
-  vitc: {
-    name: "Vitamin C",
-    note: "Commonly paired with iron-focused routines as supportive coverage.",
-  },
-  riboflavin: {
-    name: "Riboflavin (B2)",
-    note: "Often included in headache-focused routines as a supportive option.",
-  },
-  ginger: {
-    name: "Ginger extract",
-    note: "Commonly used in cramp-focused wellness stacks.",
-  },
-  probiotic: {
-    name: "Probiotic",
-    note: "Often selected as a GI support option when bloating is reported.",
-  },
-  ltheanine: {
-    name: "L-theanine",
-    note: "Supportive wind-down option often used when sleep disruption is reported.",
+  vitd: {
+    name: "Vitamin D",
+    note: "Supports calcium absorption, bone strength, immune regulation, and muscle function. Lab-guided dosing is best if deficiency is suspected.",
   },
 };
 
+const PHASE_DOSAGES = {
+  menstrual: {
+    iron: "20–24 mg/day",
+    magnesium: "350–380 mg/day",
+    zinc: "11–14 mg/day",
+    calcium: "1200–1300 mg/day",
+    vitd: "1000–2000 IU/day",
+    folate: "500–600 mcg/day",
+  },
+  follicular: {
+    iron: "18–20 mg/day",
+    magnesium: "300–340 mg/day",
+    zinc: "9–12 mg/day",
+    calcium: "1000–1200 mg/day",
+    vitd: "800–1500 IU/day",
+    folate: "400–500 mcg/day",
+  },
+  ovulatory: {
+    iron: "18–20 mg/day",
+    magnesium: "320–350 mg/day",
+    zinc: "10–13 mg/day",
+    calcium: "1100–1200 mg/day",
+    vitd: "1000–1500 IU/day",
+    folate: "400–500 mcg/day",
+  },
+  luteal: {
+    iron: "18–22 mg/day",
+    magnesium: "360–420 mg/day",
+    zinc: "12–15 mg/day",
+    calcium: "1200–1300 mg/day",
+    vitd: "1000–2000 IU/day",
+    folate: "450–600 mcg/day",
+  },
+};
+
+/* --------- Helpers --------- */
 function setYear() {
   const y = new Date().getFullYear();
   const el = $("#year");
   if (el) el.textContent = y;
 }
 
-/* --------- Loading UI --------- */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+function uniqueNonEmpty(arr) {
+  return [...new Set((arr || []).filter(Boolean))];
+}
+
+function titleCase(s) {
+  if (!s) return "";
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+function prettyPhase(v) {
+  const map = {
+    menstrual: "Menstrual",
+    follicular: "Follicular",
+    ovulatory: "Ovulatory",
+    luteal: "Luteal",
+    "unsure-phase": "Not sure",
+  };
+  return map[v] || "Not sure";
+}
+
+function prettyCycleReg(v) {
+  const map = {
+    regular: "regular",
+    irregular: "irregular",
+    "birth-control": "on hormonal birth control",
+    unsure: "tracking/unsure",
+  };
+  return map[v] || "unspecified";
+}
+
+function prettyTrainingHours(v) {
+  const map = {
+    lt5: "<5 hrs/week",
+    "5to10": "5–10 hrs/week",
+    gt10: ">10 hrs/week",
+  };
+  return map[v] || "";
+}
+
+function prettyTrainingIntensity(v) {
+  const map = {
+    low: "low–moderate",
+    moderate: "moderate",
+    high: "high",
+  };
+  return map[v] || "";
+}
+
+/* internal derived load bucket for logic compatibility */
+function deriveTrainingLoad(trainingHours, trainingIntensity) {
+  const hScore =
+    trainingHours === "gt10" ? 3 : trainingHours === "5to10" ? 2 : 1;
+  const iScore =
+    trainingIntensity === "high" ? 3 : trainingIntensity === "moderate" ? 2 : 1;
+
+  // Conservative: elite only if hours are high OR (hours moderate + intensity high)
+  if (hScore === 3 || (hScore >= 2 && iScore === 3)) return "high";
+  if (hScore === 2 || iScore === 2) return "moderate";
+  return "low";
+}
+
+function prettyTraining(intake) {
+  const hours = prettyTrainingHours(intake.trainingHours);
+  const intensity = prettyTrainingIntensity(intake.trainingIntensity);
+
+  if (hours && intensity) return `${hours} • Intensity: ${intensity}`;
+
+  // Backward-compat fallback (old saved data)
+  const mapOld = {
+    low: "<5 hrs/week",
+    moderate: "5–10 hrs/week",
+    high: ">10 hrs/week",
+  };
+  return mapOld[intake.trainingLoad] || titleCase(intake.trainingLoad);
+}
+
+function prettySymptom(v) {
+  const map = {
+    fatigue: "fatigue",
+    "heavy-bleeding": "heavy bleeding",
+    cramps: "cramps",
+    "poor-sleep": "poor sleep",
+    "brain-fog": "brain fog",
+    headaches: "headaches",
+    bloating: "bloating",
+    "mood-swings": "mood swings",
+  };
+  return map[v] || v;
+}
+
+function normalizedPhase(phaseValue, intake) {
+  const p = String(phaseValue || "").trim();
+  if (
+    p === "menstrual" ||
+    p === "follicular" ||
+    p === "ovulatory" ||
+    p === "luteal"
+  ) {
+    return p;
+  }
+
+  const s = new Set(intake?.symptoms || []);
+  if (s.has("heavy-bleeding")) return "menstrual";
+  if (s.has("cramps") || s.has("mood-swings") || s.has("poor-sleep"))
+    return "luteal";
+  return "follicular";
+}
+
+function buildSummary(intake) {
+  const parts = [];
+  parts.push(`Training: ${prettyTraining(intake)}`);
+  parts.push(`Phase: ${prettyPhase(intake.phase)}`);
+  parts.push(`Cycle: ${prettyCycleReg(intake.cycleRegularity)}`);
+  if (intake.sport) parts.push(`Sport: ${intake.sport}`);
+  if (intake.symptoms?.length)
+    parts.push(`Symptoms: ${intake.symptoms.map(prettySymptom).join(", ")}`);
+  return parts.join(" • ");
+}
+
+/* --------- Loading UI --------- */
 function showTopProgress() {
   const wrap = $("#topProgress");
   const bar = $("#topProgressBar");
@@ -174,7 +348,6 @@ function initRouter() {
   window.addEventListener("popstate", () => {
     showView(location.hash || "#home");
   });
-
   showView(location.hash || "#home");
 }
 
@@ -220,7 +393,7 @@ function initNavToggle() {
   });
 }
 
-/* --------- Intake + rules engine --------- */
+/* --------- Intake --------- */
 function getFormData(form) {
   const fd = new FormData(form);
   const symptoms = fd.getAll("symptoms");
@@ -228,10 +401,18 @@ function getFormData(form) {
   const sportOther = (fd.get("sportOther") || "").trim();
   if (sport === "Other" && sportOther) sport = sportOther;
 
+  const trainingHours = fd.get("trainingHours");
+  const trainingIntensity = fd.get("trainingIntensity");
+
+  // derived bucket to preserve existing recommendation/logic structure
+  const trainingLoad = deriveTrainingLoad(trainingHours, trainingIntensity);
+
   return {
     cycleRegularity: fd.get("cycleRegularity"),
     sport,
-    trainingLoad: fd.get("trainingLoad"),
+    trainingHours,
+    trainingIntensity,
+    trainingLoad,
     phase: fd.get("phase"),
     lmp: fd.get("lmp") || "",
     symptoms,
@@ -239,207 +420,158 @@ function getFormData(form) {
   };
 }
 
-function uniqueNonEmpty(arr) {
-  return [...new Set(arr.filter(Boolean))];
+/* --------- Phase plan: choose which nutrients appear --------- */
+function phaseSupplementKeys(intake) {
+  const phaseKey = normalizedPhase(intake.phase, intake);
+  const s = new Set(intake.symptoms || []);
+
+  // Baseline
+  const keys = new Set(["magnesium", "calcium", "vitd"]);
+
+  // Iron: menstrual or fatigue/heavy bleeding signals
+  if (phaseKey === "menstrual" || s.has("fatigue") || s.has("heavy-bleeding")) {
+    keys.add("iron");
+  }
+
+  // Folate: menstrual / fatigue / heavy bleeding / irregular cycle
+  if (
+    phaseKey === "menstrual" ||
+    s.has("fatigue") ||
+    s.has("heavy-bleeding") ||
+    intake.cycleRegularity === "irregular"
+  ) {
+    keys.add("folate");
+  }
+
+  // Zinc: luteal/menstrual or cramps/mood swings
+  if (
+    phaseKey === "luteal" ||
+    phaseKey === "menstrual" ||
+    s.has("cramps") ||
+    s.has("mood-swings")
+  ) {
+    keys.add("zinc");
+  }
+
+  const order = ["folate", "iron", "magnesium", "calcium", "zinc", "vitd"];
+  return order.filter((k) => keys.has(k));
 }
 
-function titleCase(s) {
-  if (!s) return "";
-  return s[0].toUpperCase() + s.slice(1);
+function buildPhaseItems(intake) {
+  const phaseKey = normalizedPhase(intake.phase, intake);
+  const table = PHASE_DOSAGES[phaseKey] || PHASE_DOSAGES.follicular;
+  const keys = phaseSupplementKeys(intake);
+
+  return keys.map((k) => ({
+    name: SUPP[k].name,
+    dose: table[k] || "",
+    note: SUPP[k].note,
+  }));
 }
 
-function prettyPhase(v) {
-  const map = {
-    menstrual: "Menstrual",
-    follicular: "Follicular",
-    ovulatory: "Ovulatory",
-    luteal: "Luteal",
-    "unsure-phase": "Not sure",
-  };
-  return map[v] || "Not sure";
-}
+/* --------- Targeted adjustments (protocols w/ explicit dosages) --------- */
+function buildAdjustmentItems(intake) {
+  const items = [];
+  const s = new Set(intake.symptoms || []);
+  const phaseKey = normalizedPhase(intake.phase, intake);
 
-function prettyCycleReg(v) {
-  const map = {
-    regular: "regular",
-    irregular: "irregular",
-    "birth-control": "on hormonal birth control",
-    unsure: "tracking/unsure",
-  };
-  return map[v] || "unspecified";
-}
+  // Cramps protocol (explicit)
+  if (s.has("cramps")) {
+    items.push({
+      name: "Cramps Protocol (pre-period)",
+      dose: "Nightly for 7 days before period: 250 mg magnesium (glycinate/citrate) + 45 mg zinc",
+      note: "Premenstrual protocol aimed at reducing side effects and supporting performance during the pre-period window.",
+    });
+  }
 
-function prettyTraining(v) {
-  const map = {
-    low: "<5 hrs/week",
-    moderate: "5-10 hrs/week",
-    high: ">10 hrs/week",
-  };
-  return map[v] || titleCase(v);
-}
+  // Iron risk / screening notes
+  if (s.has("fatigue") || s.has("heavy-bleeding") || phaseKey === "menstrual") {
+    items.push({
+      name: "Iron Risk Notes (screening + replenishment)",
+      dose: "Baseline female RDI: 18 mg/day • Additional athlete replenishment: +1–2 mg/day",
+      note: "Athletes can have higher iron turnover and loss (sweat/hemolysis/GI). Consider screening at ~6-month intervals if you’re at risk.",
+    });
+  }
 
-function prettySymptom(v) {
-  const map = {
-    fatigue: "fatigue",
-    "heavy-bleeding": "heavy bleeding",
-    cramps: "cramps",
-    "poor-sleep": "poor sleep",
-    "brain-fog": "brain fog",
-    headaches: "headaches",
-    bloating: "bloating",
-    "mood-swings": "mood swings",
-  };
-  return map[v] || v;
-}
+  // Low estrogen / amenorrhea risk proxy: irregular + high training
+  if (
+    intake.cycleRegularity === "irregular" &&
+    intake.trainingLoad === "high"
+  ) {
+    items.push({
+      name: "Bone Support (low-estrogen/amenorrhea risk)",
+      dose: "Calcium: 1500 mg/day (split into <500 mg doses across the day)",
+      note: "Higher calcium targets are sometimes suggested to support bone health in the presence of low estrogen. Pair with adequate vitamin D and professional guidance.",
+    });
+  }
 
-function buildSummary(intake) {
-  const parts = [];
-  parts.push(`Training: ${prettyTraining(intake.trainingLoad)}`);
-  parts.push(`Phase: ${prettyPhase(intake.phase)}`);
-  parts.push(`Cycle: ${prettyCycleReg(intake.cycleRegularity)}`);
-  if (intake.sport) parts.push(`Sport: ${intake.sport}`);
-  if (intake.symptoms?.length)
-    parts.push(`Symptoms: ${intake.symptoms.map(prettySymptom).join(", ")}`);
-  return parts.join(" • ");
+  // Vitamin D deficiency protocol (explicit)
+  items.push({
+    name: "Vitamin D (if deficiency is confirmed)",
+    dose: "2000–4000 IU vitamin D3/day",
+    note: "This range is commonly used when labs show inadequacy. For ongoing dosing, use lab-guided targets and avoid long-term high dosing without supervision.",
+  });
+
+  // Folate deficiency/pregnancy note (explicit)
+  items.push({
+    name: "Folate (if deficiency/pregnancy planning applies)",
+    dose: "Typical prenatal range: 800–1000 mcg DFE/day",
+    note: "Most prenatal formulations fall in this range. If you suspect deficiency or are pregnant/planning, individualized screening and guidance is recommended.",
+  });
+
+  return items;
 }
 
 function buildStack(intake) {
-  const phasePack = new Map();
-  const supportPack = new Map();
-
-  // Foundation baselines
-  [SUPP.omega3, SUPP.vitd, SUPP.magnesium].forEach((x) =>
-    phasePack.set(x.name, x),
-  );
-  [SUPP.omega3, SUPP.zinc, SUPP.magnesium].forEach((x) =>
-    supportPack.set(x.name, x),
-  );
+  const phaseKey = normalizedPhase(intake.phase, intake);
 
   const whyPhase = [];
-  const whySupport = [];
+  const whyAdjust = [];
 
-  const s = new Set(intake.symptoms || []);
+  whyPhase.push(
+    "Nutrient recommendations reflect shifts in estrogen/progesterone, inflammatory load, iron turnover, and bone metabolism across the menstrual cycle.",
+  );
 
-  // Phase logic
-  switch (intake.phase) {
-    case "menstrual":
-      phasePack.set(SUPP.iron.name, SUPP.iron);
-      phasePack.set(SUPP.vitc.name, SUPP.vitc);
-      whyPhase.push(
-        "Menstrual phase: prioritize blood-loss aware coverage and symptom support.",
-      );
-      break;
-
-    case "follicular":
-      whyPhase.push(
-        "Follicular phase: maintain a stable baseline while training load returns.",
-      );
-      if (s.has("heavy-bleeding") || s.has("fatigue")) {
-        phasePack.set(SUPP.iron.name, SUPP.iron);
-        whyPhase.push(
-          "Fatigue or heavy bleeding: include iron-focused coverage.",
-        );
-      }
-      break;
-
-    case "ovulatory":
-      whyPhase.push(
-        "Ovulatory phase: maintain baseline coverage and adjust based on symptoms.",
-      );
-      break;
-
-    case "luteal":
-      phasePack.set(SUPP.bcomplex.name, SUPP.bcomplex);
-      whyPhase.push(
-        "Luteal phase: symptom burden often increases, so supportive micronutrients are emphasized.",
-      );
-      break;
-
-    default:
-      whyPhase.push(
-        "Phase not specified: prioritize symptom profile and training volume with a stable baseline.",
-      );
-      break;
+  if (phaseKey === "luteal") {
+    whyPhase.push(
+      "Luteal phase: progesterone-dominant; magnesium needs often trend higher and perceived fatigue can increase.",
+    );
+  }
+  if (phaseKey === "menstrual") {
+    whyPhase.push(
+      "Menstrual phase: blood loss + higher inflammatory load—iron/folate support may be more relevant.",
+    );
   }
 
-  // Training volume logic
   if (intake.trainingLoad === "high") {
-    supportPack.set(SUPP.electrolytes.name, SUPP.electrolytes);
-    whySupport.push(
-      "Training volume >10 hrs/week: hydration and recovery support is emphasized.",
+    whyAdjust.push(
+      "High training load: consider more frequent screening and bone-support awareness if cycle irregularity is present.",
     );
-  } else if (intake.trainingLoad === "moderate") {
-    whySupport.push(
-      "Training volume 5-10 hrs/week: consistent recovery foundation is prioritized.",
-    );
-  } else {
-    whySupport.push(
-      "Training volume <5 hrs/week: streamlined baseline with symptom-targeted add-ons.",
+  }
+  if ((intake.symptoms || []).length) {
+    whyAdjust.push(
+      "Symptom-targeted protocols activate based on the symptoms you selected.",
     );
   }
 
-  // Symptom logic
-  if (s.has("fatigue")) {
-    phasePack.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    phasePack.set(SUPP.iron.name, SUPP.iron);
-    whyPhase.push(
-      "Fatigue: energy-supporting micronutrient coverage is emphasized.",
-    );
-  }
-
-  if (s.has("heavy-bleeding")) {
-    phasePack.set(SUPP.iron.name, SUPP.iron);
-    phasePack.set(SUPP.vitc.name, SUPP.vitc);
-    whyPhase.push("Heavy bleeding: reinforce blood-health aligned coverage.");
-  }
-
-  if (s.has("cramps")) {
-    phasePack.set(SUPP.ginger.name, SUPP.ginger);
-    whyPhase.push("Cramps: include common cramp-support pairing options.");
-  }
-
-  if (s.has("poor-sleep")) {
-    supportPack.set(SUPP.ltheanine.name, SUPP.ltheanine);
-    whySupport.push("Sleep disruption: add wind-down support option.");
-  }
-
-  if (s.has("headaches")) {
-    supportPack.set(SUPP.riboflavin.name, SUPP.riboflavin);
-    whySupport.push("Headaches: include supportive routine option.");
-  }
-
-  if (s.has("bloating")) {
-    supportPack.set(SUPP.probiotic.name, SUPP.probiotic);
-    whySupport.push("Bloating: include GI support option.");
-  }
-
-  if (s.has("brain-fog") || s.has("mood-swings")) {
-    phasePack.set(SUPP.bcomplex.name, SUPP.bcomplex);
-    whyPhase.push(
-      "Cognition or mood symptoms: emphasize supportive micronutrient coverage.",
-    );
-  }
-
-  const phaseArr = [...phasePack.values()];
-  const supportArr = [...supportPack.values()];
-
-  while (phaseArr.length < 4) phaseArr.push(SUPP.omega3);
-  while (supportArr.length < 4) supportArr.push(SUPP.omega3);
+  const phaseItems = buildPhaseItems(intake);
+  const adjustItems = buildAdjustmentItems(intake);
 
   return {
     summary: buildSummary(intake),
     packs: [
       {
-        title: "Phase-Aligned Plan",
-        subtitle: "Coverage aligned to your current cycle phase",
-        items: phaseArr,
+        title: "Phase-Aligned Dosage Plan",
+        subtitle: `${prettyPhase(intake.phase)} dosing aligned to cycle physiology.`,
+        items: phaseItems,
         why: uniqueNonEmpty(whyPhase),
       },
       {
-        title: "Training and Symptom Adjustments",
-        subtitle: "Add-ons aligned to training volume and reported symptoms",
-        items: supportArr,
-        why: uniqueNonEmpty(whySupport),
+        title: "Targeted Adjustments",
+        subtitle:
+          "Protocols and lab-guided ranges based on symptoms/risk signals.",
+        items: adjustItems,
+        why: uniqueNonEmpty(whyAdjust),
       },
     ],
   };
@@ -470,18 +602,24 @@ function renderResults(results) {
   setResultsSummary(results.summary);
 
   const grid = $("#resultsGrid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   results.packs.forEach((pack) => {
     const card = document.createElement("article");
     card.className = "card stack-card will-reveal";
 
-    const items = pack.items
-      .slice(0, 10)
-      .map(
-        (x) =>
-          `<li><strong>${escapeHTML(x.name)}</strong> <span class="muted">- ${escapeHTML(x.note)}</span></li>`,
-      )
+    const items = (pack.items || [])
+      .slice(0, 20)
+      .map((x) => {
+        const dose = x.dose
+          ? ` <span class="dose">• ${escapeHTML(x.dose)}</span>`
+          : "";
+        const note = x.note
+          ? ` <span class="muted">— ${escapeHTML(x.note)}</span>`
+          : "";
+        return `<li><strong>${escapeHTML(x.name)}</strong>${dose}${note}</li>`;
+      })
       .join("");
 
     const why = pack.why?.length
@@ -498,7 +636,7 @@ function renderResults(results) {
         </div>
         <div class="pill-art">${pillSVG()}</div>
       </div>
-      <ul class="stack-list">${items}</ul>
+      <ul class="stack-list">${items || "<li class='muted'>No items for this section yet.</li>"}</ul>
       ${why}
     `;
 
@@ -538,20 +676,22 @@ function recommendTier(intake) {
   const reasons = [];
   let plan = "Anchor Core";
 
-  if (intake.trainingLoad === "high") {
+  const load = intake.trainingLoad || "low";
+
+  if (load === "high") {
     plan = "Anchor Elite";
     reasons.push(
-      "Training volume is >10 hrs/week, Elite aligns to higher-frequency adjustments.",
+      "Your training load is high (hours and/or intensity), Elite aligns to higher-frequency adjustments.",
     );
-  } else if (intake.trainingLoad === "moderate") {
+  } else if (load === "moderate") {
     plan = "Anchor Performance";
     reasons.push(
-      "Training volume is 5-10 hrs/week, Performance aligns to expanded support.",
+      "Your training load is moderate, Performance aligns to expanded support.",
     );
   } else {
     plan = "Anchor Core";
     reasons.push(
-      "Training volume is <5 hrs/week, Core aligns to baseline tracking and coverage.",
+      "Your training load is baseline, Core aligns to foundational tracking and coverage.",
     );
   }
 
@@ -566,10 +706,10 @@ function recommendTier(intake) {
     );
   }
 
-  if (symptomCount >= 5 && intake.trainingLoad === "high") {
+  if (symptomCount >= 5 && load === "high") {
     plan = "Anchor Elite";
     reasons.push(
-      "High volume plus higher symptom burden supports Elite-level adjustments.",
+      "High load plus higher symptom burden supports Elite-level adjustments.",
     );
   }
 
@@ -577,68 +717,8 @@ function recommendTier(intake) {
 }
 
 function clearPlanHighlights() {
-  /* --------- Stripe Checkout (GitHub Pages via Payment Links) --------- */
-  const STRIPE_PAYMENT_LINKS = {
-    core: "https://buy.stripe.com/test_5kQ00j5ePfDWh22fn4aMU02",
-    performance: "https://buy.stripe.com/test_dRm7sL7mXajC6no3EmaMU01",
-    elite: "https://buy.stripe.com/test_bJe7sL5eP77q5jk6QyaMU00",
-  };
-
-  function normalizeTierName(name) {
-    const n = String(name || "").toLowerCase();
-
-    // Supports multiple possible labels your buttons might use
-    if (n.includes("core")) return "core";
-    if (n.includes("performance")) return "performance";
-    if (n.includes("elite")) return "elite";
-
-    // Fallbacks if your data-plan values are shorter
-    if (n === "core") return "core";
-    if (n === "performance") return "performance";
-    if (n === "elite") return "elite";
-
-    return null;
-  }
-
-  function startCheckout(tierLabel) {
-    const key = normalizeTierName(tierLabel);
-    const url = key ? STRIPE_PAYMENT_LINKS[key] : null;
-
-    if (!url) {
-      alert("Checkout link not set for this plan yet.");
-      return;
-    }
-
-    window.location.href = url;
-  }
-
-  // All plan buttons
-  $$("[data-plan]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const plan = btn.getAttribute("data-plan");
-      startCheckout(plan);
-    });
-  });
-
-  /*
-Optional: If your subscription recommendation box has a button,
-give it an id="recommendedCheckoutBtn" and call this to check out the recommended tier.
-
-Example usage (only runs if the element exists):
-*/
-  function wireRecommendedCheckout(getRecommendedTierFn) {
-    const recoBtn = document.getElementById("recommendedCheckoutBtn");
-    if (!recoBtn) return;
-
-    recoBtn.addEventListener("click", () => {
-      const recommendedTier = getRecommendedTierFn?.();
-      if (!recommendedTier) {
-        alert("Generate your results first so we can recommend a plan.");
-        return;
-      }
-      startCheckout(recommendedTier);
-    });
-  }
+  $$(".plan").forEach((p) => p.classList.remove("recommended"));
+  $$(".badge-reco").forEach((b) => b.remove());
 }
 
 function highlightRecommendedPlan(planName) {
@@ -685,18 +765,48 @@ function initTierRecommendation() {
 
 /* --------- Form wiring --------- */
 function hydrateForm(form, intake) {
+  // Backward compat: if older saved data exists, map trainingLoad to hours/intensity
+  if (!intake.trainingHours || !intake.trainingIntensity) {
+    const old = intake.trainingLoad;
+    if (old === "high") {
+      intake.trainingHours = "gt10";
+      intake.trainingIntensity = "high";
+    } else if (old === "moderate") {
+      intake.trainingHours = "5to10";
+      intake.trainingIntensity = "moderate";
+    } else if (old === "low") {
+      intake.trainingHours = "lt5";
+      intake.trainingIntensity = "low";
+    }
+    if (intake.trainingHours && intake.trainingIntensity) {
+      intake.trainingLoad = deriveTrainingLoad(
+        intake.trainingHours,
+        intake.trainingIntensity,
+      );
+    }
+  }
+
   if (intake.cycleRegularity) {
     const r = form.querySelector(
       `input[name="cycleRegularity"][value="${CSS.escape(intake.cycleRegularity)}"]`,
     );
     if (r) r.checked = true;
   }
-  if (intake.trainingLoad) {
+
+  if (intake.trainingHours) {
     const r = form.querySelector(
-      `input[name="trainingLoad"][value="${CSS.escape(intake.trainingLoad)}"]`,
+      `input[name="trainingHours"][value="${CSS.escape(intake.trainingHours)}"]`,
     );
     if (r) r.checked = true;
   }
+
+  if (intake.trainingIntensity) {
+    const r = form.querySelector(
+      `input[name="trainingIntensity"][value="${CSS.escape(intake.trainingIntensity)}"]`,
+    );
+    if (r) r.checked = true;
+  }
+
   if (intake.phase) {
     const r = form.querySelector(
       `input[name="phase"][value="${CSS.escape(intake.phase)}"]`,
@@ -785,5 +895,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavToggle();
   initForm();
   initTierRecommendation();
+  initCheckout();
   updateTierRecommendationUI();
 });
