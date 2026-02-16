@@ -1,4 +1,4 @@
-# Anchor for You ⚓
+# [Anchor for You ](anchorforyou.com)⚓
 A cycle-aware micronutrient decision engine for female athletes — delivered as a single-page website that generates a phase-aligned supplement plan based on cycle timing, weekly training **hours + intensity**, and symptoms.
 
 ---
