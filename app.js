@@ -19,8 +19,8 @@ const STORAGE_KEY = "anchorforyou_intake_v1";
 
 /* --------- Stripe Checkout (Payment Links) --------- */
 const STRIPE_PAYMENT_LINKS = {
-  core: "https://buy.stripe.com/test_bJe8wPfTtgI08vw1weaMU04",
-  performance: "https://buy.stripe.com/test_5kQ00jdLlfDW7rsej0aMU03",
+  core: "https://buy.stripe.com/test_5kQ6oH22DdvOfXYa2KaMU07",
+  performance: "https://buy.stripe.com/test_cNi14naz963mbHI5MuaMU06",
   elite: "https://buy.stripe.com/test_eVq8wP4aL8bu7rsfn4aMU05",
 };
 
@@ -59,11 +59,11 @@ function initCheckout() {
 const SUPP = {
   folate: {
     name: "Folate",
-    note: "Vital for red blood cell production, hormonal balance, and energy metabolism—supporting endurance, recovery, and long-term reproductive health.",
+    note: "Vital for red blood cell production, hormonal balance, and energy metabolism: supporting endurance, recovery, and long-term reproductive health.",
   },
   iron: {
     name: "Iron",
-    note: "Essential for oxygen delivery to muscles (endurance/VO₂ max). Female endurance athletes are at higher risk due to menstrual + sweat loss—lab-guided monitoring helps.",
+    note: "Essential for oxygen delivery to muscles (endurance/VO₂ max). Female endurance athletes are at higher risk due to menstrual + sweat loss. Lab-guided monitoring helps.",
   },
   magnesium: {
     name: "Magnesium",
@@ -75,7 +75,7 @@ const SUPP = {
   },
   zinc: {
     name: "Zinc",
-    note: "Supports immune health, recovery, protein synthesis, and hormone signaling—can help during PMS-related symptom burden.",
+    note: "Supports immune health, recovery, protein synthesis, and hormone signaling. Can help during PMS-related symptom burden.",
   },
   vitd: {
     name: "Vitamin D",
@@ -539,7 +539,7 @@ function buildStack(intake) {
   }
   if (phaseKey === "menstrual") {
     whyPhase.push(
-      "Menstrual phase: blood loss + higher inflammatory load—iron/folate support may be more relevant.",
+      "Menstrual phase: blood loss + higher inflammatory load. Iron/folate support may be more relevant.",
     );
   }
 
